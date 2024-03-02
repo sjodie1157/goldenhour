@@ -23,13 +23,15 @@ const mailConfig = {
 
 const transporter = nodemailer.createTransport( mailConfig );
 
-function mail(to, subject, text){
+function mail(to, subject, text, html=null){
     let mailOptions = {
         from: mailConfig.user,
         to,
         subject,
         text
     }
+
+    if(html) mailOptions['html'] = html;
 
     transporter.sendMail(mailOptions, (err, info)=>{
         if( err ) throw err;
