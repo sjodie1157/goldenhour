@@ -12,6 +12,12 @@ config();
 const PORT = +process.env.PORT || 4500;
 
 const app = express();
+
+app.use((req, res, next)=>{
+    req.header("Access-Control-Allow-Origin", "capstonebud.web.app");
+    req.header("Access-Control-Allow-Methods", "POST, GET");
+    next();
+})
 app.use(
     express.static('./static'),
     express.json(),
