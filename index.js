@@ -5,6 +5,7 @@ import {
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { accountRouter } from './controller/AccountController.js';
+import { handleRequestError } from './middleware/ErrorHandling.js';
 
 config();
 
@@ -21,14 +22,8 @@ app.use(
     cors()
 )
 
-app.get('/', (req, res) => {
-    console.log(req)
-    res.json({
-        status: 200,
-        msg: "Social Media Backend coming soon!"
-    })
-})
-
 app.use('/account', accountRouter);
+
+app.use(handleRequestError);
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
