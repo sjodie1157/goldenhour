@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "capstone-app-cb499"
+  },
+  "targets": {
+    "capstone-app-cb499": {
+      "hosting": {
+        "capstonebud": [
+          "dist"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
