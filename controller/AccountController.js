@@ -1,7 +1,6 @@
 import express from 'express';
 import { user } from '../model/index.js';
 import bodyParser from 'body-parser';
-import url from 'url';
 
 const accountRouter = express.Router();
 
@@ -19,8 +18,7 @@ accountRouter.post('/signup', bodyParser.json(), (req, res)=>{
         console.log(e);
     }
 });
-accountRouter.get('/signup', (req, res)=>{
-    // /signup?token=:token&ip=:ip
+accountRouter.post('/verify', (req, res)=>{
     try {
         user.verifyUserEmail(req, res);
     } catch(e){
@@ -28,11 +26,28 @@ accountRouter.get('/signup', (req, res)=>{
     }
 })
 accountRouter.post('/login', bodyParser.json(), (req, res)=>{
-    res.json({
-        msg: "trying to login"
-    })
+    try {
+        user.login(req, res);
+    } catch(e) {
+        console.log(e)
+        // handle general errors here.
+    }
 });
-accountRouter.get('/reset?verify=:token&ip=:ip', (req, res)=>{
+accountRouter.delete('/deleteaccount', bodyParser.json(), (req, res)=>{
+    try {
+        user.deleteUser(req, res);
+    } catch(e) {
+        console.log(e);
+    }
+})
+accountRouter.patch('/updateaccount', bodyParser.json(), (req, res)=>{
+    try {
+        user.updateUser(req, res);
+    } catch(e) {
+        console.log(e)
+    }
+})
+accountRouter.post('/reset', (req, res)=>{
     let resetToken = req.params.token;
     let deviceIP = req.params.ip;
     let actualIP = req.ip;
@@ -42,7 +57,7 @@ accountRouter.get('/reset?verify=:token&ip=:ip', (req, res)=>{
         actualIP,
     })
 });
-accountRouter.get('/forgot-password', (req, res)=>{
+accountRouter.post('/forgot-password', (req, res)=>{
     try {
         user.forgotPassword(res, res);
     } catch(e) {
