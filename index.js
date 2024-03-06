@@ -18,8 +18,8 @@ const PORT = +process.env.PORT || 4500;
 const app = express();
 
 app.use((req, res, next) => {
-    req.header("Access-Control-Allow-Origin", "capstonebud.web.app");
-    req.header("Access-Control-Allow-Methods", "POST, GET");
+    // req.header("Access-Control-Allow-Origin", "capstonebud.web.app");
+    // req.header("Access-Control-Allow-Methods", "POST, GET");
     next();
 })
 
@@ -35,7 +35,7 @@ app.use(
         extended: true
     }),
     cookieParser(),
-    cors(corsOptions)
+    cors()
 )
 
 app.use('/account', accountRouter);
