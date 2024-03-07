@@ -5,8 +5,9 @@ import {
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import {
-    accountRouter
-} from './controller/AccountController.js';
+    userRouter, usersRouter
+} from './controller/UserController.js';
+import { postRouter, postsRouter } from './controller/PostsController.js';
 import {
     handleRequestError
 } from './middleware/ErrorHandling.js';
@@ -38,7 +39,12 @@ app.use(
     cors()
 )
 
-app.use('/account', accountRouter);
+app.use('/user', userRouter);
+app.use('/users', usersRouter);
+app.use('/post', postRouter);
+app.use('/posts', postsRouter);
+// app.use('')
+
 app.use(handleRequestError);
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

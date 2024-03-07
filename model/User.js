@@ -21,7 +21,6 @@ import {
     config
 } from 'dotenv';
 import util from 'util';
-import url from 'url';
 import { handleAuthError } from '../middleware/ErrorHandling.js';
 
 config();
@@ -192,9 +191,9 @@ class User {
 
                 let new_token = createToken(
                     {
-                        username: userName, 
-                        email: userEmail, 
-                        age: userAge, 
+                        username: userName,
+                        email: userEmail,
+                        age: userAge,
                         role: userRole
                     }
                 );
