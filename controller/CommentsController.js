@@ -1,8 +1,8 @@
 import express from 'express';
 import { comment } from '../model/index.js';
 
-const commentRouter = express.Router();
-const commentsRouter = express.Router();
+const commentRouter = express.Router({mergeParams: true});
+const commentsRouter = express.Router({mergeParams: true});
 
 commentRouter.get('/:cID', (req, res)=>{
     try {

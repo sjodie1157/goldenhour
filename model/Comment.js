@@ -2,7 +2,8 @@ import {
     connection as db
 } from '../config/index.js';
 import {
-    code, comment
+    code,
+    comment
 } from '../model/index.js';
 import {
     verifyAToken
@@ -10,24 +11,57 @@ import {
 import {
     handleAuthError
 } from '../middleware/ErrorHandling.js';
+import util from 'util';
+
+const dbAsync = util.promisify(db.query).bind(db);
 
 class Comment {
-    fetchComment(req, res) {
-        let postID = req.params.postID;
-        let commentID = req.params.cID;
+    async fetchComment(req, res) {
         let token = req.headers['authorization'];
+        let postID = +req.params.postID;
+        let commentID = +req.params.cID;
+
+        if (!token) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+        } else {
+            token = token.split(' ').at(-1);
+        }
+
+        console.log(token);
 
         try {
             let user = verifyAToken(token);
+
+            const getPost = `SELECT userID, postID FROM Posts WHERE postID = ?;`;
+
+            let result = await dbAsync(getPost, [postID]);
+
+            if (result.length == 0) {
+                res.status(code.NOTFOUND).send({
+                    status: code.NOTFOUND,
+                    msg: "Post does not exist"
+                })
+                return;
+            }
 
             const getPostComment = `SELECT commentID, commentText, postID FROM Comments WHERE postID = ? AND commentID = ?;`;
 
             db.query(getPostComment, [postID, commentID], (err, result) => {
                 if (err) throw err;
-                res.status(code.OK).send({
-                    status: code.OK,
-                    result
-                })
+                if (result.length) {
+                    res.status(code.OK).send({
+                        status: code.OK,
+                        result
+                    })
+                } else {
+                    res.status(code.NOTFOUND).send({
+                        status: code.NOTFOUND,
+                        msg: "Comment not found"
+                    })
+                }
             });
         } catch (e) {
             console.log(e);
@@ -35,8 +69,17 @@ class Comment {
         }
     }
     fetchComments(req, res) {
-        let postID = req.params.postID;
         let token = req.headers['authorization'];
+        let postID = +req.params.postID;
+
+        if (!token) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+        } else {
+            token = token.split(' ').at(-1);
+        }
 
         try {
             let user = verifyAToken(token);
@@ -56,34 +99,55 @@ class Comment {
         }
     }
     async addComment(req, res) {
-        let postID = req.params.postID;
         let token = req.headers['authorization'];
         let data = req.body;
 
-        if( !data.comment ){
+        console.log(data);
+
+        if (!token) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+        } else {
+            token = token.split(' ').at(-1);
+        }
+
+        if ( !data.comment || !data.postID ) {
             res.status(code.BADREQUEST).send({
                 status: code.BADREQUEST,
-                msg: "Please provide a comment"
+                msg: "Please provide a comment and postID"
             })
+            return;
         }
 
         try {
             let user = verifyAToken(token);
 
+            // check if the post exists
+            const getPost = `SELECT userID, postID FROM Posts WHERE postID = ?;`;
+            let pResult = await dbAsync(getPost, [data.postID])
+
+            if( pResult.length == 0 ){
+                res.status(code.NOTFOUND).send({
+                    status: code.NOTFOUND,
+                    msg: "Post does not exist"
+                })
+                return;
+            }
+
             const getUserID = `SELECT userID, userEmail FROM Users WHERE userEmail = ?;`;
 
             let result = await dbAsync(getUserID, [user.email]);
-            const {
-                userID
-            } = result[0];
+            const { userID } = result[0];
 
             const insertComment = `INSERT INTO Comments SET ?`;
 
             let payload = {
-                commentText: comment,
-                postID: postID,
+                commentText: data.comment,
+                postID: data.postID,
                 userID: userID,
-                commentTime: 'sometime'
+                commentTime: (new Date()).toISOString().slice(0, 19).replace('T', " ")
             }
 
             db.query(insertComment, [payload], (err, result) => {
@@ -98,13 +162,13 @@ class Comment {
             handleAuthError(e);
         }
     }
-   async updateComment(req, res) { // PATCH
+    async updateComment(req, res) { // PATCH
         let token = req.headers['authorization'];
         let postID = req.params.postID;
         let commentID = req.params.cID;
         let data = req.body;
 
-        if( !data.comment ){
+        if (!data.comment) {
             res.status(code.BADREQUEST).send({
                 status: code.BADREQUEST,
                 msg: "Invalid comment"
@@ -117,7 +181,9 @@ class Comment {
             const getUserID = `SELECT userID, userEmail FROM Users WHERE userEmail = ?;`
 
             let result = await dbAsync(getUserID, [user.email]);
-            const { userID } = result[0];
+            const {
+                userID
+            } = result[0];
 
             const updatePostComment = `UPDATE Comments SET ? WHERE postID = ? AND commentID = ? AND userID = ?;`;
 
@@ -125,14 +191,14 @@ class Comment {
                 commentText: data.comment
             }
 
-            db.query(updatePostComment, [payload, postID, commentID, userID], (err, result)=>{
-                if(err) throw err;
+            db.query(updatePostComment, [payload, postID, commentID, userID], (err, result) => {
+                if (err) throw err;
                 res.status(code.OK).send({
                     status: code.OK,
                     result
                 })
             })
-        } catch(e) {
+        } catch (e) {
             console.log(e);
         }
     }
@@ -147,19 +213,22 @@ class Comment {
             const getUserID = `SELECT userID, userEmail FROM Users WHERE userEmail = ?;`;
 
             let result = await dbAsync(getUserID, [user.email]);
-            const { userID } = result[0];
+            const {
+                userID
+            } = result[0];
 
             const deletePostComment = `DELETE FROM Comment WHERE postID = ? AND commentID = ? AND userID = ?;`;
 
-            db.query(deletePostComment, [postID, commentID, userID], (err, result)=>{
-                if(err) throw err;
+            db.query(deletePostComment, [postID, commentID, userID], (err, result) => {
+                if (err) throw err;
                 res.status(code.OK).send({
                     status: code.OK,
                     result
                 })
             })
-        } catch(e) {
+        } catch (e) {
             console.log(e);
+            handleAuthError(e, req, res);
         }
     }
 }

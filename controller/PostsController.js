@@ -23,7 +23,7 @@ postsRouter.post('/', (req, res)=>{
 
 postRouter.get('/:postID', (req, res)=>{
     try {
-        post.getPost(req, res);
+        post.fetchPost(req, res);
     } catch(e) {
         console.log(e);
     }
@@ -44,7 +44,8 @@ postRouter.delete('/:postID', bodyParser.json(), (req, res)=>{
 })
 
 postRouter.use('/comment', commentRouter);
-postRouter.use('/comments', commentsRouter);
+postRouter.use('/:postID/comment', commentRouter);
+postRouter.use('/:postID/comments', commentsRouter);
 
 export {
     postRouter,

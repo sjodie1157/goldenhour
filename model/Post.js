@@ -2,15 +2,24 @@ import { get } from 'http';
 import { connection as db } from '../config/index.js';
 import { verifyAToken } from '../middleware/UserAuthentication.js';
 import { code } from '../model/index.js';
-import util from 'util';
 import { handleAuthError } from '../middleware/ErrorHandling.js';
+import util from 'util';
 
 const dbAsync = util.promisify(db.query).bind(db);
 
 class Post {
     fetchPost(req, res){
         let token = req.headers['authorization'];
-        let postID = +req.params.id;
+        let postID = +req.params.postID;
+
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+        } else {
+            token = token.split(' ').at(-1);
+        }
 
         if( !postID ) {
             res.status(code.NOTFOUND).send({
@@ -23,7 +32,7 @@ class Post {
         try {
             let user = verifyAToken(token);
 
-            const qry = `SELECT postID, userMedia, userComment, userID FROM Posts WHERE postID = ?;`;
+            const qry = `SELECT postMedia, postComment FROM Posts WHERE postID = ?;`;
 
             db.query(qry, [postID], (err, result)=>{
                 if(err) throw err;
@@ -208,29 +217,54 @@ class Post {
         }
     }
     async deletePost(req, res){
-        let postID = req.params.postID;
-        let data = req.body;
+        let token = req.headers['authorization'];
+        let _postID = +req.params.postID;
+        
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
 
         try {
             let user = verifyAToken(token);
 
-            const getUserID = `SELECT userID, userEmail FROM Posts WHERE userEmail = ?;`;
+            const getUserID = `SELECT userID, userEmail FROM Users WHERE userEmail = ?;`;
 
             let result = await dbAsync(getUserID, [user.email]);
+            const dbUser = result[0];
+            let userID = dbUser.userID;
 
-            const { userID } = result[0];
+            const getUserPost = `SELECT userID, postID FROM Posts WHERE postID = ?;`;
 
-            const deletePost = `DELETE FROM Posts WHERE userID = ? AND postID = ?;`;
-
-            db.query(deletePost, [userID, postID], (err)=>{
-                if(err) throw err;
-                res.status(code.OK).send({
-                    status: code.OK,
-                    msg: "Post Updated "
+            let uResult = await dbAsync(getUserPost, [_postID]);
+            if( uResult.length <= 0 ) {
+                res.status(code.NOTFOUND).send({
+                    status: code.NOTFOUND,
+                    msg: "Post does not exist"
                 })
-            })
+                return;
+            }
+            const dbPost = uResult[0];
+
+            if( userID == dbPost.postID || user.role == "admin" ){
+                const deleteUserPost = `DELETE FROM Posts WHERE postID = ?;`;
+    
+                db.query(deleteUserPost, [_postID], (err, result)=>{
+                    if(err) throw err;
+                    res.status(code.OK).send({
+                        status: code.OK,
+                        msg: "Post deleted"
+                    })
+                })
+            }
         } catch(e) {
-            console.log(e)
+            console.log(e);
+            handleAuthError(e, req, res);
         }
     }
 }
