@@ -13,36 +13,36 @@ usersRouter.get('/', (req, res)=>{
     }
 })
 
-userRouter.get('/:id', (req, res)=>{
+userRouter.get('/:userID', (req, res)=>{
     try {
         user.fetchUser(req, res)
     } catch(e) {
         console.log(e)
     }
 })
-userRouter.post('/register', bodyParser.json(), (req, res)=>{
+// userRouter.post('/register', bodyParser.json(), (req, res)=>{
+//     try {
+//         user.createUser(req, res);
+//     } catch(e) {
+//         console.log(e);
+//     }
+// });
+userRouter.patch('/:userID', bodyParser.json(), (req, res)=>{
     try {
-        user.createUser(req, res);
-    } catch(e) {
-        console.log(e);
-    }
-});
-userRouter.patch('/:id', bodyParser.json(), (req, res)=>{
-    try {
-        user.fetchUser(req, res)
+        user.updateUser(req, res)
     } catch(e) {
         console.log(e)
-    }
+    } 
 })
-userRouter.post('/login', bodyParser.json(), (req, res)=>{
-    try {
-        user.login(req, res);
-    } catch(e) {
-        console.log(e)
-        // handle general errors here.
-    }
-});
-userRouter.delete('/user/:id', (req, res)=>{
+// userRouter.post('/login', bodyParser.json(), (req, res)=>{
+//     try {
+//         user.login(req, res);
+//     } catch(e) {
+//         console.log(e)
+//         // handle general errors here.
+//     }
+// });
+userRouter.delete('/:userID', (req, res)=>{
     try {
         user.deleteUser(req, res);
     } catch(e) {

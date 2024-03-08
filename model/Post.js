@@ -3,22 +3,24 @@ import { connection as db } from '../config/index.js';
 import { verifyAToken } from '../middleware/UserAuthentication.js';
 import { code } from '../model/index.js';
 import util from 'util';
+import { handleAuthError } from '../middleware/ErrorHandling.js';
 
 const dbAsync = util.promisify(db.query).bind(db);
 
 class Post {
     fetchPost(req, res){
         let token = req.headers['authorization'];
+        let postID = +req.params.id;
+
+        if( !postID ) {
+            res.status(code.NOTFOUND).send({
+                status: code.NOTFOUND,
+                msg: "The post you trying to access is invalid"
+            })
+            return;
+        }
+
         try {
-            let postID = +req.params.id;
-
-            if( !postID ) {
-                res.status(code.NOTFOUND).send({
-                    status: code.NOTFOUND,
-                    msg: "The post you trying to access is invalid"
-                })
-            }
-
             let user = verifyAToken(token);
 
             const qry = `SELECT postID, userMedia, userComment, userID FROM Posts WHERE postID = ?;`;
@@ -32,6 +34,7 @@ class Post {
             })
         } catch(e) {
             console.log(e);
+            handleAuthError(e, req, res);
         }
     }
     fetchPosts(req, res){
@@ -46,11 +49,20 @@ class Post {
         //     }), 
         //     body: 'A=1&B=2'
         // });
+        
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+        } else {
+            token = token.split(' ').at(-1);
+        }
 
         try {
             let user = verifyAToken(token);
 
-            const qry = `SELECT postID, userMedia, userComment, userID FROM Posts;`
+            const qry = `SELECT postID, postMedia, postComment, userID, postTime FROM Posts;`
 
             db.query(qry, (err, result)=>{
                 if(err) throw err;
@@ -72,10 +84,20 @@ class Post {
         let token = req.headers['authorization'];
         let data = req.body;
 
+        
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
+        
         let query = [!data.media, !data.comment]
-
         let usablequery = query.filter((item) => {
-            return item == true
+            return item == false
         });
 
         if( usablequery.length == 0 ){
@@ -83,7 +105,9 @@ class Post {
                 status: code.BADREQUEST,
                 msg: "Please provide media or a comment for your post"
             })
+            return;
         }
+
 
         try {
             let user = verifyAToken(token);
@@ -96,7 +120,8 @@ class Post {
             let payload = {
                 postMedia: data.media,
                 postComment: data.comment,
-                userID: userID
+                userID: userID,
+                postTime: (new Date()).toISOString().slice(0, 19).replace('T', ' ')
             }
 
             const qry = `INSERT INTO Posts SET ?;`;
@@ -110,35 +135,76 @@ class Post {
             })
         } catch(e) {
             console.log(e);
+            handleAuthError(e, req, res);
         }
     }
     async updatePost(req, res){ // PATCH
-        let postID = req.params.postID;
+        let _postID = +req.params.postID;
+        let token = req.headers['authorization']
         let data = req.body;
+
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
+
+        let query = [!data.media, !data.comment]
+        let usablequery = query.filter((item) => {
+            return item == false
+        });
+
+        if( usablequery.length == 0 ){
+            res.status(code.BADREQUEST).send({
+                status: code.BADREQUEST,
+                msg: "Please provide media or a comment for your post"
+            })
+            return;
+        }
 
         try {
             let user = verifyAToken(token);
 
-            const getUserID = `SELECT userID, userEmail FROM Posts WHERE userEmail = ?;`;
+            const getUserID = `SELECT userID, userEmail FROM Users WHERE userEmail = ?;`;
 
             let result = await dbAsync(getUserID, [user.email]);
 
-            const { userID } = result[0];
+            const dbUser = result[0];
+            let _userID = dbUser.userID;
+
             let payload = {
                 postComment: data.comment,
                 postMedia: data.media
             }
-            const updatePost = `UPDATE FROM Posts SET ? WHERE userID = ? AND postID = ?`;
 
-            db.query(updatePost, [payload, userID, postID], (err)=>{
-                if(err) throw err;
-                res.status(code.OK).send({
-                    status: code.OK,
-                    msg: "Post Updated "
+            const getPost = `SELECT userID, postID FROM Posts WHERE postID = ?;`;
+
+            let pResult = await dbAsync(getPost, [_postID]);
+            const { postID, userID } = pResult[0];
+
+            if( _userID == userID ){
+                const updatePost = `UPDATE Posts SET ? WHERE userID = ? AND postID = ?;`;
+    
+                db.query(updatePost, [payload, userID, postID], (err)=>{
+                    if(err) throw err;
+                    res.status(code.OK).send({
+                        status: code.OK,
+                        msg: "Post Updated"
+                    })
                 })
-            })
+            } else {
+                res.status(code.FORBIDDEN).send({
+                    status: code.FORBIDDEN,
+                    msg: "This is not your post"
+                })
+            }
         } catch(e) {
             console.log(e)
+            handleAuthError(e, req, res);
         }
     }
     async deletePost(req, res){

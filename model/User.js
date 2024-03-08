@@ -21,7 +21,9 @@ import {
     config
 } from 'dotenv';
 import util from 'util';
-import { handleAuthError } from '../middleware/ErrorHandling.js';
+import {
+    handleAuthError
+} from '../middleware/ErrorHandling.js';
 
 config();
 
@@ -33,41 +35,96 @@ const dbAsync = util.promisify(db.query).bind(db);
 class User {
     // admin will be able to block/unblock users even suspend(ban);
     // privs are: user, premium(can have a video on there profile), admin
-    fetchUser(req, res) {
-        // this function will fetch the user using this function if privledges is user.
-        // admin can fetch any user
-        let token = req.cookies.token;
+    async fetchUser(req, res) {
+        let token = req.headers['authorization'];
+        let _userID = +req.params.userID;
 
-        if (!token) {
+        if( !token ){
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
-                msg: "no account"
+                msg: "Please login in"
             })
-            return;
+        } else {
+            token = token.split(' ').at(-1);
         }
 
         try {
-            verifyAToken(token);
-        } catch (e) {
+            let user = verifyAToken(token);
+
+            const getUserID = `SELECT userID FROM Users WHERE userEmail = ?;`;
+            let result = await dbAsync(getUserID, [user.email]);
+
+            const { userID } = result[0];
+            // console.log(userID)
+            // console.log('dbUserID type: ', typeof userID);
+            // console.log(_userID)
+            if( user.role == 'admin' || _userID == userID  ){
+                const getUser = `SELECT userName, userEmail, userRole, userAge FROM Users WHERE userID = ?;`;
+
+                db.query(getUser, [_userID], (err, result)=>{
+                    if(err) throw err
+                    res.status(code.OK).send({
+                        status: code.OK,
+                        result
+                    })
+                })
+            } else {
+                res.status(code.UNAUTHORIZED).send({
+                    status: code.UNAUTHORIZED,
+                    msg: "Access denied for user"
+                })
+            }
+        } catch(e) {
             console.log(e)
+            handleAuthError(e, req, res);
         }
-        res.status(200).send({
-            status: 200,
-            token,
-            msg: "token found"
-        })
     }
     fetchUsers(req, res) {
-        // only admin can use this function
+        let token = req.headers['authorization'];
+
+        
+        if (!token) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please Log in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
+        
+        try {
+            let user = verifyAToken(token);
+
+            if (user.role != 'admin') {
+                res.status(code.FORBIDDEN).send({
+                    status: code.FORBIDDEN,
+                    msg: "This is not allowed"
+                })
+            } else {
+                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile FROM Users;`;
+
+                db.query(getUsers, (err, result)=>{
+                    if(err) throw err;
+                    res.status(code.OK).send({
+                        status: code.OK,
+                        result
+                    })
+                })
+            }
+        } catch (e) {
+            console.log(e)
+            handleAuthError(e, req, res);
+        }
+
     }
     async createUser(req, res) {
         // can only create user accounts
         // account has to be upgraded to premium
         // age restriction, 13+
         let data = req.body;
-        let deviceIP = req.socket.remoteAddress;
 
-        if( !data.username || !data.email || !data.password || typeof data.age != 'number' ){
+        if (!data.username || !data.email || !data.password || (typeof data.age != 'number' && data.age >= 13)) {
             res.status(code.BADREQUEST).send({
                 status: code.BADREQUEST,
                 msg: "Invalid information provided"
@@ -80,7 +137,7 @@ class User {
         let result = await dbAsync(emailCheck, [data.email]);
         console.log('email check result: ', result)
 
-        if( result.length > 0 ){
+        if (result.length > 0) {
             res.status(code.FORBIDDEN).send({
                 status: code.FORBIDDEN,
                 msg: "account already exists"
@@ -114,11 +171,11 @@ class User {
         })
     }
     verifyUserEmail(req, res) {
-        let {token} = req.body;
+        let token = req.headers['authorization'];
 
         try {
             let user = verifyAToken(token);
-            console.log(user);
+            // console.log(user);
             // put the user into the database.
             let qry = `INSERT INTO Users SET ?`;
 
@@ -130,9 +187,9 @@ class User {
                 userRole: user.userRole
             }
 
-            
-            db.query(qry, [payload], (err)=>{
-                if(err) throw err
+
+            db.query(qry, [payload], (err) => {
+                if (err) throw err
 
                 delete payload['userPass'];
                 token = createToken(payload, '7d');
@@ -146,119 +203,137 @@ class User {
 
             })
             // return a session token
-        } catch(e) {
+        } catch (e) {
             console.log(e)
             handleAuthError(e, req, res);
         }
-
+        
     }
-    async updateUser(req, res) {
+    async updateUser(req, res) { // PATCH
         // post the token
         let data = req.body;
+        let _userID = +req.params.userID;
+        let token = req.headers['authorization'];
 
-        if( !data.token ){
+        if( !token ){
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
-                msg: "Token is invalid"
+                msg: "Please login in"
             })
-        }
-
-        if( data.password ) data.password = await hash( data.password, ROUNDS );
-        // what if they use the verify token
-        try {
-            let user = verifyAToken(data.token)
-            // check if the user is in the database
-            const emailCheck = `SELECT userID, userEmail, userName, userPass, userAge, userRole FROM Users WHERE userEmail = ?;`;
-            delete data[data.token];
-
-            let payload = {
-                userName: data.username,
-                userPass: data.password,
-                userAge: data.age,
-                userProfile: data.profile,
-            }
-
-            for(let key in payload){
-                if( !payload[key] ){
-                    delete payload[key];
-                }
-            }
-            
-            let result = await dbAsync(emailCheck, [user.email]);
-            // console.log('email check result: ', result)
-            if( result.length > 0 ){
-                let { userID, userName, userEmail, userAge, userRole } = result[0]
-
-                let new_token = createToken(
-                    {
-                        username: userName,
-                        email: userEmail,
-                        age: userAge,
-                        role: userRole
-                    }
-                );
-
-                const updateProfile = `UPDATE Users SET ? WHERE userID = ${userID};`;
-                await dbAsync(updateProfile, [payload])
-                
-                // send a new token back and blacklist the old one
-                const blacklistToken = `INSERT INTO BlacklistTokens SET token = ?, userID = ?`
-                await dbAsync(blacklistToken, [data.token, userID]);
-
-                res.status(code.OK).send({
-                    status: code.OK,
-                    msg: "Account updated",
-                    new_token
-                })
-            } else {
-                res.status(code.UNAUTHORIZED).send({
-                    status: code.UNAUTHORIZED,
-                    msg: "Account does not exist"
-                })
-            }
-        } catch(e) {
-            console.log(e);
-            handleAuthError(e, req, res);
-            return;
-        }
-    }
-    async deleteUser(req, res) {
-        // there has to be a token here, if not then how did they get here without login
-        let {token, password} = req.body
-
-        if( !token || !password || typeof password != 'string' ) {
-            res.status(code.UNAUTHORIZED).send({
-                status: code.UNAUTHORIZED,
-                msg: "Please make sure you provided your token and password"
-            })
+        } else {
+            token = token.split(' ').at(-1);
         }
 
         try {
             let user = verifyAToken(token);
-            // now we need to delete the account
-            const getPassword = `SELECT userPass FROM Users WHERE userEmail = ?`;
-            const deleteAccount = `DELETE FROM Users WHERE userEmail = ?;`;
-            let result = await dbAsync(getPassword, [user.email]);
-            if( result.length > 0 ){
-                password = await hash(password, 10);
-                let correctPass = compareSync( password, result[0].userPass );
-                console.log(correctPass)
-                if( correctPass ) {
-                    await dbAsync(deleteAccount, [user.email]);
+            const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole FROM Users WHERE userEmail = ?;`;
+
+            let result = await dbAsync(getUserID, [user.email]);
+            const { userID, userEmail, userName, userPass, userAge, userRole } = result[0];
+
+            if( data.password ) data.password = await hash(data.password, ROUNDS);
+            
+            if( _userID == userID ){
+                let tokenPayload = {
+                    username: (data.username) ? (data.username) : userName,
+                    email: userEmail,
+                    age: (data.age) ? (data.age) : userAge,
+                    role: (user.role == 'admin') ? data.role : userRole
+                }
+                let dbPayload = {
+                    userEmail: userEmail,
+                    userName: (data.username) ? data.username : userName, 
+                    userPass: (data.password) ? data.password : userPass, 
+                    userAge: (data.age) ? data.age : userAge,
+                    userRole: (user.role == 'admin') ? data.role : userRole
+                }
+
+                let new_token = createToken(tokenPayload, '7d');
+
+                const updateUserAccount = `UPDATE Users SET ? WHERE userID = ?`;
+                db.query(updateUserAccount, [dbPayload, _userID], (err, result)=>{
+                    if(err) throw err
                     res.status(code.OK).send({
                         status: code.OK,
-                        msg: "Account deleted"
+                        msg: "Account updated successfully",
+                        new_token
                     })
-                } else {
-                    res.status(code.UNAUTHORIZED).send({
-                        status: code.UNAUTHORIZED,
-                        msg: "Password in incorrect"
-                    })
-                }
+                })
             } else {
+                res.status(code.UNAUTHORIZED).send({
+                    status: code.UNAUTHORIZED,
+                    msg: "Invalid account to update"
+                })
+            }
+
+        } catch (e) {
+            console.log(e);
+            handleAuthError(e, req, res);
+        }
+    }
+    async deleteUser(req, res) {
+        // there has to be a token here, if not then how did they get here without login
+        let token = req.headers['authorization'];
+        let _userID = req.params.userID;
+        let data = req.body;
+
+        if( !data.password ) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please provide password"
+            })
+        }
+        
+        if (!token) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please Log in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
+
+        try {
+            let user = verifyAToken(token);
+
+            const getUserPassword = `SELECT userID, userName, userEmail, userAge, userPass, userProfile FROM Users WHERE userEmail = ?;`;
+            let result = await dbAsync(getUserPassword, [user.email]);
+
+            if( result.length < 1 ) {
                 res.status(code.NOTFOUND).send({
                     status: code.NOTFOUND,
                     msg: "Account does not exist"
+                })
+                return;
+            }
+            const { userID, userPass } = result[0];
+
+            if( _userID == userID ){
+                let correctPass = compare(data.password, userPass);
+
+                if( correctPass ){
+                    const deleteUserAccount = `DELETE FROM Users WHERE userID = ?;`;
+
+                    db.query(deleteUserAccount, [userID], (err, result)=>{
+                        if(err);
+                        
+                        res.status(code.OK).send({
+                            status: code.OK,
+                            msg: "Account deleted."
+                        })
+                    })
+
+                } else {
+                    res.status(code.UNAUTHORIZED).send({
+                        status: code.UNAUTHORIZED,
+                        msg: "Incorrect password, account not deleted"
+                    })
+                }
+            } else {
+                res.status(code.UNAUTHORIZED).send({
+                    status: code.UNAUTHORIZED,
+                    msg: "Invalid account to update"
                 })
             }
         } catch(e) {
@@ -268,58 +343,58 @@ class User {
     }
     async login(req, res) {
         let data = req.body;
+        // before login first check if token is valid, if its valid then redirect them away from this page, this is done on frontend
 
-        try {
-            if( data.token ){
-                let user = verifyAToken( data.token );
-                user.msg = "User logged in";
-                res.status(200).send(user);
-            } else {
-                const getAccount = `SELECT * FROM Users WHERE userEmail = ?;`
-                
-                let result = await dbAsync(getAccount, [data.email])
-                if( result.length > 0 ){
-                    let correctPass = compareSync(data.password, result[0].userPass);
-                    if( correctPass ){
-                        let user = {
-                            username: result[0].userName,
-                            email: result[0].userEmail,
-                            age: result[0].userAge,
-                            role: result[0].userRole,
-                            profile: result[0].userProfile
-                        }
-                        let token = createToken( user, '7d' );
-
-                        res.status(code.OK).send({
-                            status: code.OK,
-                            msg: "User logged in",
-                            token
-                        })
-                    } else {
-                        res.status(code.UNAUTHORIZED).send({
-                            status: code.UNAUTHORIZED,
-                            msg: "Invalid password or email Address"
-                        })
-                    }
-                } else {
-                    res.status(code.UNAUTHORIZED).send({
-                        status: code.UNAUTHORIZED,
-                        msg: "User account does not exist."
-                    })
-                }
-            }
-        } catch(e) {
-            console.log(e);
-            handleAuthError(e, req, res);
+        if( !data.email || !data.password ){
+            res.status(code.BADREQUEST).send({
+                sattus: code.BADREQUEST,
+                msg: "Invalid email or password"
+            })
         }
-        // will login user and retrieve a jwt session that will by default expire in 1 hr unless set to 30days or a week
+
+        // check password
+        const getUserPassword = `SELECT userID, userName, userEmail, userPass, userRole, userAge, userProfile FROM Users WHERE userEmail = ?;`;;
+        let result = await dbAsync(getUserPassword, [data.email]);
+
+        if( result.length > 0 ){
+            const { userID, userName, userEmail, userPass, userRole, userAge, userProfile } = result[0];
+
+            let correctPass = compareSync(data.password, userPass);
+
+            if( correctPass ){
+                let payload = {
+                    username: userName,
+                    email: userEmail,
+                    role: userRole,
+                    age: userAge
+                }
+    
+                let token = createToken(payload, '7d');
+
+                res.status(code.OK).send({
+                    status: code.OK,
+                    token,
+                    msg: "Welcome User"
+                })
+            } else {
+                res.status(code.UNAUTHORIZED).send({
+                    status: code.UNAUTHORIZED,
+                    msg: "Either password or email is incorrect"
+                })
+            }
+
+
+        } else {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Account does not exist, try signing up."
+            })
+        }
     }
     logout(req, res) {
         // there has to be a token here, if not then how did they get here without login
         // this will blacklist a jwt token until it expires
-        let {token} = req.body;
-
-        console.log(token);
+        
         // this will logout the user
     }
     upgradeUser(req, res) {

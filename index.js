@@ -11,6 +11,7 @@ import { postRouter, postsRouter } from './controller/PostsController.js';
 import {
     handleRequestError
 } from './middleware/ErrorHandling.js';
+import { user } from './model/index.js';
 
 config();
 
@@ -39,11 +40,25 @@ app.use(
     cors()
 )
 
+app.post('/login', (req, res)=>{
+    try {
+        user.login(req, res);
+    } catch(e) {
+        console.log(e)
+    }
+})
+app.post('/register', (req, res)=>{
+    try {
+        user.createUser(req, res);
+    } catch(e) {
+        console.log(e)
+    }
+})
+
 app.use('/user', userRouter);
 app.use('/users', usersRouter);
 app.use('/post', postRouter);
 app.use('/posts', postsRouter);
-// app.use('')
 
 app.use(handleRequestError);
 
