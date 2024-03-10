@@ -32,17 +32,17 @@ commentRouter.delete('/:cID', (req, res)=>{
         console.log(e);
     }
 });
-commentRouter.delete('/', (req, res)=>{
-    try {
-        comment.deleteComment(req, res);
-    } catch(e) {
-        console.log(e)
-    }
-})
 
 commentsRouter.get('/', (req, res)=>{
     try {
         comment.fetchComments(req, res);
+    } catch(e) {
+        console.log(e);
+    }
+})
+commentsRouter.delete('/', (req, res)=>{
+    try {
+        comment.deleteComments(req, res);
     } catch(e) {
         console.log(e);
     }

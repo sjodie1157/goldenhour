@@ -51,29 +51,16 @@ class User {
         try {
             let user = verifyAToken(token);
 
-            const getUserID = `SELECT userID FROM Users WHERE userEmail = ?;`;
-            let result = await dbAsync(getUserID, [user.email]);
+            const getUser = `SELECT userName, userEmail, userRole, userAge FROM Users WHERE userID = ?;`;
+            console.log(_userID)
 
-            const { userID } = result[0];
-            // console.log(userID)
-            // console.log('dbUserID type: ', typeof userID);
-            // console.log(_userID)
-            if( user.role == 'admin' || _userID == userID  ){
-                const getUser = `SELECT userName, userEmail, userRole, userAge FROM Users WHERE userID = ?;`;
-
-                db.query(getUser, [_userID], (err, result)=>{
-                    if(err) throw err
-                    res.status(code.OK).send({
-                        status: code.OK,
-                        result
-                    })
+            db.query(getUser, [_userID], (err, result)=>{
+                if(err) throw err
+                res.status(code.OK).send({
+                    status: code.OK,
+                    result
                 })
-            } else {
-                res.status(code.UNAUTHORIZED).send({
-                    status: code.UNAUTHORIZED,
-                    msg: "Access denied for user"
-                })
-            }
+            })
         } catch(e) {
             console.log(e)
             handleAuthError(e, req, res);

@@ -3,7 +3,8 @@ import {
 } from '../config/index.js';
 import {
     code,
-    comment
+    comment,
+    post
 } from '../model/index.js';
 import {
     verifyAToken
@@ -30,8 +31,6 @@ class Comment {
             token = token.split(' ').at(-1);
         }
 
-        console.log(token);
-
         try {
             let user = verifyAToken(token);
 
@@ -47,7 +46,7 @@ class Comment {
                 return;
             }
 
-            const getPostComment = `SELECT commentID, commentText, postID FROM Comments WHERE postID = ? AND commentID = ?;`;
+            const getPostComment = `SELECT commentID, commentText, postID, userID FROM Comments WHERE postID = ? AND commentID = ?;`;
 
             db.query(getPostComment, [postID, commentID], (err, result) => {
                 if (err) throw err;
@@ -84,7 +83,7 @@ class Comment {
         try {
             let user = verifyAToken(token);
 
-            const getPostComments = `SELECT commentID, commentText, postID FROM Comments WHERE postID = ?`;
+            const getPostComments = `SELECT commentID, commentText, postID, userID FROM Comments WHERE postID = ?`;
 
             db.query(getPostComments, [postID], (err, result) => {
                 if (err) throw err;
@@ -101,8 +100,6 @@ class Comment {
     async addComment(req, res) {
         let token = req.headers['authorization'];
         let data = req.body;
-
-        console.log(data);
 
         if (!token) {
             res.status(code.UNAUTHORIZED).send({
@@ -164,15 +161,27 @@ class Comment {
     }
     async updateComment(req, res) { // PATCH
         let token = req.headers['authorization'];
-        let postID = req.params.postID;
-        let commentID = req.params.cID;
+        let postID = +req.params.postID;
+        let commentID = +req.params.cID;
         let data = req.body;
+
+        
+        if (!token) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
 
         if (!data.comment) {
             res.status(code.BADREQUEST).send({
                 status: code.BADREQUEST,
                 msg: "Invalid comment"
             })
+            return;
         }
 
         try {
@@ -185,17 +194,30 @@ class Comment {
                 userID
             } = result[0];
 
+            console.log(userID)
+            // check if comment exists
+            const getComment = `SELECT commentID, userID, postID FROM Comments WHERE commentID = ? AND userID = ? AND postID = ?;`;
+
+            let cResult = await dbAsync(getComment, [commentID, userID, postID]);
+            if(cResult.length <= 0){
+                res.status(code.OK).send({
+                    status: code.OK,
+                    msg: "Comment invalid"
+                })
+                return;
+            }
+
             const updatePostComment = `UPDATE Comments SET ? WHERE postID = ? AND commentID = ? AND userID = ?;`;
 
             let payload = {
                 commentText: data.comment
             }
 
-            db.query(updatePostComment, [payload, postID, commentID, userID], (err, result) => {
+            db.query(updatePostComment, [payload, postID, commentID, userID], (err) => {
                 if (err) throw err;
                 res.status(code.OK).send({
                     status: code.OK,
-                    result
+                    msg: "Comment updated"
                 })
             })
         } catch (e) {
@@ -204,8 +226,77 @@ class Comment {
     }
     async deleteComment(req, res) {
         let token = req.headers['authorization'];
-        let postID = req.params.postID;
-        let commentID = req.params.cID;
+        let postID = +req.params.postID;
+        let commentID = +req.params.cID;
+
+        if (!token) {
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
+
+        console.log(token)
+
+        try {
+            let user = verifyAToken(token);
+
+            const getUserID = `SELECT userID, userEmail, userRole FROM Users WHERE userEmail = ?;`;
+
+            let result = await dbAsync(getUserID, [user.email]);
+            const {
+                userID,
+                userRole
+            } = result[0];
+
+            //check if post exist
+            const getPost = `SELECT postID, commentID, userID FROM Comments WHERE postID = ? AND commentID = ?`;
+
+            let post = await dbAsync(getPost, [postID, commentID]);
+            if(!post.length){
+                res.status(code.NOTFOUND).send({
+                    status: code.NOTFOUND,
+                    msg: "Comment does not exist"
+                })
+                return;
+            }
+            if( userID == post.userID || (user.role == 'admin' && userRole == 'admin') ){
+                const deletePostComment = `DELETE FROM Comments WHERE postID = ? AND commentID = ?`;
+
+                db.query(deletePostComment, [postID, commentID], (err, result) => {
+                    if (err) throw err;
+                    res.status(code.OK).send({
+                        status: code.OK,
+                        msg: "Comment deleted"
+                    })
+                })
+            } else {
+                res.status(code.FORBIDDEN).send({
+                    status: code.FORBIDDEN,
+                    msg: "You cannot delete this comment"
+                })
+            }
+
+        } catch (e) {
+            console.log(e);
+            handleAuthError(e, req, res);
+        }
+    }
+    async deleteComments(req, res){
+        let token = req.headers['authorization'];
+        let _postID = +req.params.postID;
+
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+        } else {
+            token = token.split(' ').at(-1);
+        }
 
         try {
             let user = verifyAToken(token);
@@ -217,13 +308,24 @@ class Comment {
                 userID
             } = result[0];
 
-            const deletePostComment = `DELETE FROM Comment WHERE postID = ? AND commentID = ? AND userID = ?;`;
+            const getUserComments = `SELECT commentID, postID, userID FROM Comments WHERE postID = ? AND userID = ?;`;
 
-            db.query(deletePostComment, [postID, commentID, userID], (err, result) => {
+            let pResult = await dbAsync(getUserComments, [_postID, userID])
+            if( pResult.length <= 0 ){
+                res.status(code.NOTFOUND).send({
+                    status: code.NOTFOUND,
+                    msg: "No comments found"
+                })
+                return;
+            }
+
+            const deletePostComment = `DELETE FROM Comments WHERE postID = ? AND userID = ?;`;
+
+            db.query(deletePostComment, [_postID, userID], (err, result) => {
                 if (err) throw err;
                 res.status(code.OK).send({
                     status: code.OK,
-                    result
+                    msg: "Comments deleted"
                 })
             })
         } catch (e) {

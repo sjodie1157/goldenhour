@@ -6,6 +6,7 @@ config();
 const { sign, verify } = jwt
 
 function createToken(user, expire=null){
+    console.log(expire)
     return sign(
     user,
     process.env.SECRET_KEY,
