@@ -22,13 +22,13 @@ function handleAuthError(err, req, res){
         case err instanceof TokenExpiredError:
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
-                msg: "Token Expired"
+                msg: "Token expired"
             });
             break;
         case err instanceof JsonWebTokenError:
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
-                msg: "Token Expired"
+                msg: "Token invalid"
             });
             break;
         default:

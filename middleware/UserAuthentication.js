@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { hash, compare } from 'bcrypt';
 import { config } from 'dotenv';
 
 config();
@@ -7,6 +6,7 @@ config();
 const { sign, verify } = jwt
 
 function createToken(user, expire=null){
+    console.log(expire)
     return sign(
     user,
     process.env.SECRET_KEY,
