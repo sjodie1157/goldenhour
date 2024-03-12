@@ -13,9 +13,9 @@
                     </div>
                 </div>
             </div>
-            <div class="py-5"></div>
-            <div class="py-5"></div>
-            <div class="py-5"></div>
+            <div class="py-4"></div>
+            <div class="py-4"></div>
+            <div class="py-4"></div>
             <div class="p-2 bg-white text-dark d-flex flex-column align-items-start border-bottom border-1">
                 <div class="tags text-secondary px-2">
                     <small class="m-2">#happynewyear</small>

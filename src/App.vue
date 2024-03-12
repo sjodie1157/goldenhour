@@ -1,8 +1,8 @@
 <template>
-    <NavComp />
-    <main>
+    <div class="vh-100 d-flex flex-column">
+        <NavComp />
         <router-view />
-    </main>
+    </div>
     <FooterComp />
 </template>
 
@@ -22,15 +22,36 @@ export default {
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
+:root {
+    --dark: rgb(75,0,129);
+}
+
+body {
+    background: linear-gradient(var(--dark) -70%, white 100%);
+}
+
+.app-bg-primary {
+    background-color: var(--primary);
+}
+.app-bg-white {
+    background-color: white !important;
+}
+
+.app-btn-dark {
+    background-color: var(--dark) !important;
+    color: white !important;
+}
+.app-btn-outline-dark {
+    background-color: transparent !important;
+    color: rgba(0,0,0,0.4) !important;
+    border-color: var(--dark);
+}
+.app-nav-btn {
+    border-radius: 0px !important;
+}
+
 * {
     font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
-#app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-}
 </style>
