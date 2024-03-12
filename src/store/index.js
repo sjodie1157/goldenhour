@@ -2,8 +2,8 @@ import {
     createStore
 } from 'vuex';
 
-const API = "http://localhost:5000";
-// const API = "https://capstonebud.onrender.com";
+// const API = "http://localhost:5000";
+const API = "https://capstonebud.onrender.com";
 
 export default createStore({
     state: {
@@ -26,7 +26,8 @@ export default createStore({
         redirect(context, route){
             location.href = `${location.origin}/${route}`;
         },
-        async signUpUser(context, payload){
+        // async signUpUser(context, payload){},
+        async signInUser(context, payload){
             try {
                 let result = await fetch(`${API}/account/signup`, {
                     method: "POST",
@@ -41,21 +42,7 @@ export default createStore({
                 console.log(e);
             }
         },
-        async verify(context, token){
-            try {
-                let result = await fetch(`${API}/account/verify`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({token})
-                })
-                let data = await result.json();
-                context.commit('setUser', data);
-            } catch(e) {
-                console.log(e)
-            }
-        }
+        // async verify(context, token){}
     },
     modules: {}
 })
