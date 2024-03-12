@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid vh-100">
         <div class="row">
-            <div class="col-2 bg-body-tertiary vh-100 p-0 d-flex flex-column">
+            <div class="col-2 bg-body-tertiary vh-100 p-0 d-flex flex-column align-items-center">
                 <div class="sideNav bg-primary-subtle">
                     <div class="profile_and_search p-3">
                         <div class="input-group mb-3">
@@ -24,24 +24,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="px-4 flex-fill">
-                    <div class="mt-4 px-4 d-flex align-items-center justify-content-center">
-                        <div class="w-25 ratio ratio-1x1 d-flex align-items-center justify-content-center">
-                            <span
-                                class="text-primary border border-1 rounded-3 d-flex align-items-center justify-content-center"><i
-                                    class="bi bi-house-door-fill"></i></span>
-                        </div>
-                        <div class="w-75 user-select-none text-secondary d-flex px-3">New Feed</div>
-                    </div>
-                    <div class="mt-2 px-4 d-flex align-items-center justify-content-center">
-                        <div class="w-25 ratio ratio-1x1 d-flex align-items-center justify-content-center">
-                            <span
-                                class="text-warning border border-1 rounded-3 d-flex align-items-center justify-content-center"><i
-                                    class="bi bi-bookmarks-fill"></i></span>
-                        </div>
-                        <div class="w-75 user-select-none text-secondary d-flex px-3">Saved</div>
-                    </div>
-                </div>
+                <FeedNavComponent />
                 <div class="p-3">
                     <button
                         class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
@@ -51,8 +34,9 @@
                 </div>
             </div>
             <div class="col-6 bg-white px-3 vh-100 d-flex flex-column">
-                <PostNavComponent/>
+                <PostNavComponent />
                 <div class="posts flex-fill overflow-auto">
+                    <PostComponent />
                     <PostComponent />
                 </div>
             </div>
@@ -63,6 +47,7 @@
 <script>
 import PostComponent from '@/components/PostComp.vue';
 import PostNavComponent from '@/components/PostNavComp.vue';
+import FeedNavComponent from '@/components/FeedNavComp.vue'
 
 export default {
     name: "FeedView",
@@ -73,10 +58,12 @@ export default {
     },
     components: {
         PostComponent,
-        PostNavComponent
+        PostNavComponent,
+        FeedNavComponent
     },
     mounted() {
         // username=John Smith; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/
+        this.$store.state.display_nav = false;
         // let token = this.$cookies.get('token');
         // if( !token ){
         //     this.$store.dispatch('redirect', '');

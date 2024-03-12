@@ -8,7 +8,7 @@ const API = "http://localhost:5000";
 export default createStore({
     state: {
         user: null,
-        display_nav: false
+        display_nav: true
     },
     getters: {},
     mutations: {
