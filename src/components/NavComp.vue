@@ -3,15 +3,15 @@
         <div class="container-fluid">
             <router-link to="/login" class="m-0 p-0 btn border-0"><h5 class="fw-bold text-secondary m-0 py-3 text-white"><i class="bi bi-app m-2"></i>CapstoneBud</h5></router-link>
             <div class="d-flex justify-content-center">
-                <div class="position-relative mx-1">
+                <div class="position-relative mx-1" @click="linkHover">
                     <div class="position-absolute start-50 top-100 p-1 rounded-circle translate-middle bg-white"></div>
                     <router-link to="/login" class="btn border-0 rounded-pill m-1 position-relative text-white d-flex">Home</router-link>
                 </div>
-                <div class="position-relative mx-1">
+                <div class="position-relative mx-1" @hover="linkHover">
                     <div class="position-absolute start-50 top-100 p-0 rounded-circle translate-middle bg-white"></div>
                     <router-link to="/login" class="btn border-0 rounded-pill m-1 position-relative text-white d-flex">About</router-link>
                 </div>
-                <div class="position-relative mx-1">
+                <div class="position-relative mx-1" @hover="linkHover">
                     <div class="position-absolute start-50 top-100 p-0 rounded-circle translate-middle bg-white"></div>
                     <router-link to="/login" class="btn border-0 rounded-pill m-1 position-relative text-white d-flex">Contact</router-link>
                 </div>
@@ -30,9 +30,13 @@ export default {
         navigation(){
             return this.$store.state.display_nav;
         }
+    },
+    methods: {
+        linkHover(){
+            alert('hello');
+        }
     }
 }
 </script>
 <style scoped>
-
 </style>

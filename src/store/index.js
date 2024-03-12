@@ -29,7 +29,7 @@ export default createStore({
         // async signUpUser(context, payload){},
         async signInUser(context, payload){
             try {
-                let result = await fetch(`${API}/account/signup`, {
+                let result = await fetch(`${API}/login`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
