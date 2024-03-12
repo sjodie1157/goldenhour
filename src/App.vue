@@ -24,6 +24,7 @@ export default {
 
 :root {
     --dark: rgb(75,0,129);
+    --dark-subtle: rgb(151,107,182);
 }
 
 body {
