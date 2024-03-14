@@ -1,7 +1,7 @@
 <template>
-    <main class="flex-fill container-fluid">
+    <main class="flex-fill container-fluid px-4">
         <div class="row h-100">
-            <div class="col-lg-6 d-flex flex-column justify-content-evenly align-items-center">
+            <div class="col-lg-6 d-flex flex-column justify-content-top align-items-center">
                 <div class="d-flex flex-column mt-4">
                     <h4 class="display-4 fw-bold position-relative text-white d-flex flex-column">
                         CapstoneBud
@@ -10,7 +10,8 @@
                         </span>
                     </h4>
                 </div>
-                <LoginComp />
+                <RegisterComp v-if="formState" />
+                <LoginComp v-else />
             </div>
             <div class="col-lg-6 d-flex flex-column justify-content-center">
                 <PhoneDesignComp />
@@ -22,35 +23,25 @@
 <script>
 import PhoneDesignComp from '@/components/PhoneDesignComp.vue';
 import LoginComp from '@/components/LoginComp.vue';
+import RegisterComp from '@/components/RegisterComp.vue';
 
 export default {
     name: 'HomeView',
     data() {
-        return {
-            registerForm: {
-                username: "",
-                email: "",
-                password: "",
-                confirmpassword: "",
-                age: 0,
-            }
-        }
     },
     mounted(){
-        
+
     },
     components: {
         PhoneDesignComp,
-        LoginComp
+        LoginComp,
+        RegisterComp
     },
     methods: {
-        register() {
-            this.$store.dispatch('signUpUser', this.registerForm);
-        }
     },
     computed: {
-        users() {
-            return this.$store.state.user;
+        formState(){
+            return this.$store.state.formState;
         }
     }
 }
