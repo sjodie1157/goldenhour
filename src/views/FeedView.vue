@@ -1,31 +1,13 @@
 <template>
     <div class="container-fluid vh-100">
         <div class="row">
-            <div class="col-2 bg-body-tertiary vh-100 p-0 d-flex flex-column align-items-center">
-                <div class="sideNav bg-primary-subtle">
-                    <div class="profile_and_search p-3">
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1"><i
-                                    class="bi bi-search text-secondary"></i></span>
-                            <input class="form-control" type="text" placeholder="search"
-                                aria-describedby="basic-addon1" />
-                        </div>
-                        <div class="mt-5 d-flex">
-                            <div class="self-contact bg-secondary-subtle d-flex justify-content-center mt-1 rounded-2">
-                                <div class="profile_picture m-1 bg-secondary shadow rounded-4 p-4"></div>
-                                <div class=" d-none d-lg-flex flex-column justify-content-evenly align-items-start">
-                                    <div class="text-truncate d-flex flex-column justify-content-evenly align-items-start">
-                                        <small class="mx-2 text-white">MrBud</small>
-                                        <small class="mx-2 text-white d-flex fw-light text-truncate"
-                                            style="font-size: x-small;">solocyberengineer@gmail.com</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-3 bg-body-tertiary vh-100 p-0 d-flex flex-column">
+                <FeedSideNavComp v-if="user" :user='{
+                    username: user.username,
+                    email: user.email
+                }' />
                 <FeedNavComponent />
-                <div class="p-3">
+                <div class="p-3 d-flex justify-content-center">
                     <button
                         class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
                         <span><i class="bi bi-gear-fill ms-1"></i></span>
@@ -35,12 +17,30 @@
             </div>
             <div class="col-6 bg-white px-3 vh-100 d-flex flex-column">
                 <PostNavComponent />
-                <div class="posts flex-fill overflow-auto">
-                    <PostComponent />
-                    <PostComponent />
+                <div class="posts flex-fill overflow-auto" v-if="posts">
+                    <!-- {{ user }} -->
+                    {{ posts }}
+                    <PostComponent v-for="post in posts" :key="post" :user='{
+                        username: user.username,
+                        profile: user.profile
+                    }' :post='{
+                        image: post.postMedia,
+                        comment: post.postComment,
+                        time: convertTimeStamp(post.postTime),
+                        userID: post.userID,
+                        postID: post.postID
+                    }' />
+                    <!-- <PostComponent :user='{
+                        username: "MrBud",
+                        email: "solocyberengineer@gmail.com",
+                        profile: "https://i.ibb.co/thMjDB8/vitaliy-shevchenko-f-MNP7-XVcct0-unsplash.jpg"
+                    }' :post='{
+                        image: "",
+                        comment: "Just some generated text to test if this comment looks neat enough to look legit."
+                    }' /> -->
                 </div>
             </div>
-            <div class="col-4 bg-danger vh-100">asd</div>
+            <div class="col-3 bg-danger vh-100">asd</div>
         </div>
     </div>
 </template>
@@ -48,6 +48,7 @@
 import PostComponent from '@/components/PostComp.vue';
 import PostNavComponent from '@/components/PostNavComp.vue';
 import FeedNavComponent from '@/components/FeedNavComp.vue'
+import FeedSideNavComp from '@/components/FeedSideNavComp.vue';
 
 export default {
     name: "FeedView",
@@ -59,39 +60,47 @@ export default {
     components: {
         PostComponent,
         PostNavComponent,
-        FeedNavComponent
+        FeedNavComponent,
+        FeedSideNavComp
     },
     mounted() {
-        // username=John Smith; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/
+        this.$store.dispatch('loadUser');
         this.$store.state.display_nav = false;
         // let token = this.$cookies.get('token');
+
+        this.$store.dispatch('getPosts');
         // if( !token ){
         //     this.$store.dispatch('redirect', '');
         // }
         // get feed, if cannot get feed because autherror then redirect to login page
 
         // console.log(1);
+    },
+    computed: {
+        user() {
+            return this.$store.state.user;
+        },
+        posts() {
+            return this.$store.state.posts;
+        }
+    },
+    methods: {
+        convertTimeStamp(timestamp) {
+            let date = new Date(timestamp);
+            let options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                timeZone: 'UTC'
+            };
+
+            let formattedDate = date.toLocaleDateString('en-US', options);
+
+            return formattedDate
+        }
     }
 }
 </script>
-<style scoped>
-.form-control::placeholder {
-    color: rgba(0, 0, 0, 0.3);
-    font-size: small;
-    text-anchor: middle;
-    text-align: left;
-}
-
-.friends .btn {
-    aspect-ratio: 1;
-    border-color: rgba(0, 0, 0, 0.3);
-}
-
-.top-bar {
-    border-color: rgba(0, 0, 0, 0.3);
-}
-
-.profile_picture {
-    aspect-ratio: 1;
-}
-</style>
+<style scoped></style>
