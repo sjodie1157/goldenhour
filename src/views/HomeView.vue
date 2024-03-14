@@ -1,5 +1,5 @@
 <template>
-    <main class="flex-fill container-fluid px-4">
+    <main class="flex-fill container-fluid" @load="alertConcern">
         <div class="row h-100">
             <div class="col-lg-6 d-flex flex-column justify-content-top align-items-center">
                 <div class="d-flex flex-column mt-4">
@@ -25,12 +25,17 @@ import PhoneDesignComp from '@/components/PhoneDesignComp.vue';
 import LoginComp from '@/components/LoginComp.vue';
 import RegisterComp from '@/components/RegisterComp.vue';
 
+import { useCookies } from 'vue3-cookies';
+
+const {cookies} = useCookies();
+
 export default {
     name: 'HomeView',
     data() {
     },
     mounted(){
-
+        this.alertConcern();
+        this.checkLogin();
     },
     components: {
         PhoneDesignComp,
@@ -38,8 +43,26 @@ export default {
         RegisterComp
     },
     methods: {
+        alertConcern(){
+            let msg = cookies.get('alertMsg');
+            if( msg ){
+                this.$store.dispatch('sweetAlert', msg );
+            }
+        },
+        checkLogin() {
+            let user = cookies.get('authToken');
+            if(user){
+                this.$store.dispatch('redirect', 'feed');
+            }
+        }
     },
     computed: {
+        users() {
+            return this.$store.state.user;
+        },
+        alertMsg(){
+            return this.$store.state.alertMsg;
+        },
         formState(){
             return this.$store.state.formState;
         }

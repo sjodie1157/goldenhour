@@ -14,7 +14,7 @@
                 <div class="position-relative my-2">
                     <label for="password" class="badge bg-primary-subtle text-secondary m-1">password</label>
                     <div class="input-group mb-3">
-                        <input v-model="payload.password" class="form-control shadow-none border-0" type="password"
+                        <input ref="password" v-model="payload.password" class="form-control shadow-none border-0" type="password"
                             placeholder="password" aria-describedby="pass-view">
                         <span class="pointer input-group-text border-0" id="pass-view" @click="togglePasswordView">
                             <i v-if="showPassword" class="bi bi-eye-slash-fill"></i>
@@ -60,10 +60,10 @@ export default {
         submitForm() {
             this.$store.dispatch('signInUser', this.payload);
         },
-        togglePasswordView(event) {
-            let input = event.target.parentElement.parentElement.children[0];
+        togglePasswordView() {
+            let input = this.$refs.password;
             this.showPassword = this.showPassword ? false : true;
-            
+
             if( this.showPassword ){
                 input.setAttribute('type', 'text');
             } else {
@@ -74,10 +74,6 @@ export default {
 }
 </script>
 <style scoped>
-.form-floating {
-    &:focus {}
-}
-
 .form-control {
     font-size: small;
 }
