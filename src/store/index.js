@@ -16,7 +16,8 @@ export default createStore({
         display_nav: true,
         posts: null,
         alertMsg: null,
-        formState: true
+        formState: true,
+        isAdmin: false,
     },
     getters: {},
     mutations: {
@@ -31,6 +32,9 @@ export default createStore({
         },
         setFormState(state, value) {
             state.formState = value;
+        },
+        setAdmin(state, value){
+            state.isAdmin = value;
         }
     },
     actions: {
@@ -49,7 +53,9 @@ export default createStore({
         },
         // async signUpUser(context, payload){},
         async loadUser(context){
-            context.commit('setUser', getUserFromToken());
+            let user = getUserFromToken();
+            if( user.role == 'admin' ) context.commit('setAdmin', true);
+            context.commit('setUser', user);
         },
         async getPosts(context){
             try {

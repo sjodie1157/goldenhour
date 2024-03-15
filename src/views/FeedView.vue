@@ -31,7 +31,9 @@
                     }' />
                 </div>
             </div>
-            <div class="col-3 bg-danger vh-100">asd</div>
+            <div class="col-3 bg-danger p-0">
+                <i class="bi bi-person-gear text-white fs-1"></i>
+            </div>
         </div>
     </div>
 </template>
