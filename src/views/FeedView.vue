@@ -7,22 +7,21 @@
                     email: user.email
                 }' />
                 <FeedNavComponent />
-                <div class="p-3 d-flex justify-content-center">
+                <!-- <div class="p-3 d-flex justify-content-center">
                     <button
                         class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
                         <span><i class="bi bi-gear-fill ms-1"></i></span>
-                        <small class="mx-2">Settings</small>
+                        <small class="mx-2">Settings ss</small>
                     </button>
-                </div>
+                </div> -->
             </div>
             <div class="col-6 bg-white px-3 vh-100 d-flex flex-column">
                 <PostNavComponent />
-                <div class="posts flex-fill overflow-auto" v-if="posts">
+                <div class="posts flex-fill overflow-auto" v-if="posts && user">
                     <PostComponent v-for="post in posts" :key="post" :user='{
                         username: post.userName,
                         profile: post.userProfile,
-                        currentUserPost: post.userName == user.username,
-                        role: user.role
+                        hasFullOptions: (post.userID == user.userID) || user.role == "admin"
                     }' :post='{
                         image: post.postMedia,
                         comment: post.postComment,

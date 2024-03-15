@@ -48,10 +48,10 @@
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
                     class="bi bi-clipboard me-2"></i><small class="me-2">Copy Link</small></button>
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"
-                v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-pencil-square me-2"></i><small
+                v-if="user.hasFullOptions"><i class="bi bi-pencil-square me-2"></i><small
                     class="me-2">Edit Post</small></button>
             <button class="btn btn-danger w-100 py-2 my-0 border-0 rounded-0"
-                v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-trash me-2"></i><small
+                v-if="user.hasFullOptions"><i class="bi bi-trash me-2"></i><small
                     class="me-2">Delete</small></button>
         </div>
     </div>

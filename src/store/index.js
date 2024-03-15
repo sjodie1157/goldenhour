@@ -58,7 +58,13 @@ export default createStore({
         // async signUpUser(context, payload){},
         async loadUser(context){
             let user = getUserFromToken();
-            console.log(user)
+
+            let result = await sendRequest(`${API}/user/profile/me`, "GET");
+            let reply = await result.json();
+
+            user = reply.result;
+
+            console.log('user profile: ',user)
             if(user){
                 if( user.role == 'admin' ) context.commit('setAdmin', true);
                 context.commit('setUser', user);

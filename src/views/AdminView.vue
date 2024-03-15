@@ -61,7 +61,7 @@
                                 <td class="align-middle"><small>{{ user.userProfile }}</small></td>
                                 <td class="d-flex flex-column justify-content-center align-items-center">
                                     <button class="btn btn-danger my-1" data-bs-target="#userEdit"
-                                        data-bs-toggle="modal">Manage</button>
+                                        data-bs-toggle="modal" @click="manageUser(user)">Manage</button>
                                     <!-- <button class="btn btn-dark my-1 w-75">Suspend</button> -->
                                     <!-- <button class="btn btn-dark my-1 w-75">Delete</button> -->
                                 </td>
@@ -72,38 +72,24 @@
             </div>
         </div>
     </div>
-    <div class="modal modal-xl fade" id="userEdit">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="display-5 text-secondary fs-5 fw-medium text-center m-0">Manage User</h5>
-                    <button type="button" class="btn-close border-0 shadow-none" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <!-- <div class="modal-header">
-                    <div class="modal-title">User Edit</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Modal body text goes here</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div> -->
-            </div>
-        </div>
-    </div>
+    <AdminUserEdit :user='manageUserData'/>
 </template>
 <script>
 import FeedNavComponent from '@/components/FeedNavComp.vue';
 import FeedSideNavComp from '@/components/FeedSideNavComp.vue';
+import AdminUserEdit from '@/components/AdminUserEdit.vue';
 
 export default {
     name: "AdminView",
+    data(){
+        return {
+            manageUserData: {}
+        }
+    },
     components: {
         FeedNavComponent,
-        FeedSideNavComp
+        FeedSideNavComp,
+        AdminUserEdit
     },
     mounted() {
         this.$store.state.display_nav = false;
@@ -129,6 +115,9 @@ export default {
         searchUser() {
             let searchInput = this.$refs.searchInput;
             this.$store.dispatch('adminSearchUser', searchInput.value);
+        },
+        manageUser(user){
+            this.manageUserData = user;
         },
         searchEnter() { },
         searchLeave() { }
