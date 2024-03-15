@@ -30,7 +30,18 @@
                                 <th scope="col" class="text-secondary fw-light text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody v-if="users">
+                            <tr class="text-secondary text-center fw-light" v-for="user in users" :key="user">
+                                <td class="align-middle"><small>{{user.userID}}</small></td>
+                                <td class="align-middle"><small>{{user.userName}}</small></td>
+                                <td class="align-middle"><small>{{user.userEmail}}</small></td>
+                                <td class="align-middle"><small>{{user.userProfile}}</small></td>
+                                <td class="d-flex flex-column justify-content-center align-items-center">
+                                    <button class="btn btn-dark my-1 w-75">Edit</button>
+                                    <!-- <button class="btn btn-dark my-1 w-75">Suspend</button> -->
+                                    <!-- <button class="btn btn-dark my-1 w-75">Delete</button> -->
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -51,6 +62,7 @@ export default {
     mounted() {
         this.$store.state.display_nav = false;
         this.$store.dispatch('loadUser');
+        this.$store.dispatch('adminGetUsers');
     },
     computed: {
         user() {
@@ -62,6 +74,9 @@ export default {
         },
         posts() {
             return this.$store.state.posts;
+        },
+        users() {
+            return this.$store.state.users;
         }
     }
 }
