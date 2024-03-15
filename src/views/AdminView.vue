@@ -37,13 +37,30 @@
                                 <td class="align-middle"><small>{{user.userEmail}}</small></td>
                                 <td class="align-middle"><small>{{user.userProfile}}</small></td>
                                 <td class="d-flex flex-column justify-content-center align-items-center">
-                                    <button class="btn btn-dark my-1 w-75">Edit</button>
+                                    <button class="btn btn-dark my-1 w-75" data-bs-target="#userEdit" data-bs-toggle="modal">Edit</button>
                                     <!-- <button class="btn btn-dark my-1 w-75">Suspend</button> -->
                                     <!-- <button class="btn btn-dark my-1 w-75">Delete</button> -->
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="userEdit">
+        <div class="wider-modal modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">User Edit</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
@@ -81,4 +98,8 @@ export default {
     }
 }
 </script>
-<style></style>
+<style scoped>
+.wider-modal {
+    width: 80% !important;
+}
+</style>
