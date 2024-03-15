@@ -18,6 +18,7 @@ export default createStore({
         alertMsg: null,
         formState: true,
         isAdmin: false,
+        users: null
     },
     getters: {},
     mutations: {
@@ -35,6 +36,9 @@ export default createStore({
         },
         setAdmin(state, value){
             state.isAdmin = value;
+        },
+        setUsers(state, value){
+            state.users = value;
         }
     },
     actions: {
@@ -184,7 +188,17 @@ export default createStore({
                 sweet(alertMsg);
             }
         },
-        async getFeed(){}
+        async getFeed(){},
+        async adminGetUsers(context){
+            try {
+                let result = await sendRequest(`${API}/users`);
+
+                let reply = await result.json();
+                context.commit('setUsers', reply.result);
+            } catch(e) {
+                console.log(e);
+            }
+        }
     },
     modules: {}
 })
