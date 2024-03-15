@@ -52,7 +52,6 @@ class User {
             let user = verifyAToken(token);
 
             const getUser = `SELECT userName, userEmail, userRole, userAge FROM Users WHERE userID = ?;`;
-            console.log(_userID)
 
             db.query(getUser, [_userID], (err, result)=>{
                 if(err) throw err
@@ -69,7 +68,7 @@ class User {
     fetchUsers(req, res) {
         let token = req.headers['authorization'];
 
-        
+
         if (!token) {
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
@@ -122,7 +121,6 @@ class User {
         const emailCheck = `SELECT userEmail FROM Users WHERE userEmail = ?;`;
 
         let result = await dbAsync(emailCheck, [data.email]);
-        console.log('email check result: ', result)
 
         if (result.length > 0) {
             res.status(code.FORBIDDEN).send({
@@ -328,15 +326,48 @@ class User {
             handleAuthError(e, req, res);
         }
     }
+    searchUser(req, res){
+        let token = req.headers['authorization'];
+        let searchQuery = req.params.query;
+
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+            return;
+        } else {
+            token = token.split(' ').at(-1);
+        }
+
+        try {
+            let user = verifyAToken(token);
+            let applyRole = 'AND userRole = "user"';
+
+            const qry = `SELECT userID, userName FROM Users WHERE userName like ? ${ (user.role != 'admin') ? applyRole : '' };`;
+
+            db.query(qry, [searchQuery+"%"], (err, result)=>{
+                if(err) throw err;
+                res.status(code.OK).send({
+                    status: code.OK,
+                    result
+                })
+            })
+        } catch(e) {
+            handleAuthError(e, req, res);
+            return;
+        }
+    }
     async login(req, res) {
         let data = req.body;
         // before login first check if token is valid, if its valid then redirect them away from this page, this is done on frontend
 
         if( !data.email || !data.password ){
-            res.status(code.BADREQUEST).send({
-                sattus: code.BADREQUEST,
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
                 msg: "Invalid email or password"
             })
+            return;
         }
 
         // check password
@@ -363,11 +394,13 @@ class User {
                     token,
                     msg: "Welcome User"
                 })
+                return;
             } else {
                 res.status(code.UNAUTHORIZED).send({
                     status: code.UNAUTHORIZED,
                     msg: "Either password or email is incorrect"
                 })
+                return;
             }
 
 

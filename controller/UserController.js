@@ -12,6 +12,13 @@ usersRouter.get('/', (req, res)=>{
         console.log(e)
     }
 })
+usersRouter.get('/search/:query', (req, res)=>{
+    try {
+        user.searchUser(req, res);
+    } catch(e) {
+        console.log(e)
+    }
+})
 
 userRouter.get('/:userID', (req, res)=>{
     try {
@@ -20,13 +27,6 @@ userRouter.get('/:userID', (req, res)=>{
         console.log(e)
     }
 })
-// userRouter.post('/register', bodyParser.json(), (req, res)=>{
-//     try {
-//         user.createUser(req, res);
-//     } catch(e) {
-//         console.log(e);
-//     }
-// });
 userRouter.patch('/:userID', bodyParser.json(), (req, res)=>{
     try {
         user.updateUser(req, res)
@@ -34,14 +34,6 @@ userRouter.patch('/:userID', bodyParser.json(), (req, res)=>{
         console.log(e)
     } 
 })
-// userRouter.post('/login', bodyParser.json(), (req, res)=>{
-//     try {
-//         user.login(req, res);
-//     } catch(e) {
-//         console.log(e)
-//         // handle general errors here.
-//     }
-// });
 userRouter.delete('/:userID', (req, res)=>{
     try {
         user.deleteUser(req, res);
