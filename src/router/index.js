@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import HomeView from '../views/HomeView.vue'
-import VerifyView from '../views/VerifyView.vue';
-import FeedView from '../views/FeedView.vue';
+import HomeView from '@/views/HomeView.vue'
+import VerifyView from '@/views/VerifyView.vue';
+import FeedView from '@/views/FeedView.vue';
+import ContactView from '@/views/ContactView.vue';
+import AboutView from '@/views/AboutView.vue';
+import AdminView from '@/views/AdminView.vue';
 
 const routes = [
   {
@@ -13,18 +16,17 @@ const routes = [
   {
     path: '/about',
     name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    component: AboutView
   },
   {
     path: '/contact',
     name: 'contact',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    component: ContactView
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: AdminView
   },
   {
     path: '/verify',

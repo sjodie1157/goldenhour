@@ -9,23 +9,29 @@ class method {
     patch = "PATCH";
 }
 
-async function sendRequest(url, method="GET", data=null) {
+async function sendRequest(url, method, data=null) {
     let authToken = cookies.get('authToken');
     let requestParams = {
-        method,
+        method: method,
         headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + authToken
         }
     }
-    if( data ) {
-        requestParams['body'] = JSON.parse(data);
-    }
+
+    if( authToken ) requestParams.headers['Authorization'] = "Bearer " + authToken;
+    if( data ) requestParams['body'] = JSON.stringify(data);
+
     let result = await fetch(url, requestParams);
     return result;
 }
+
 function getUserFromToken(){
-    return JSON.parse( atob( cookies.get('authToken').split('.')[1] ) );
+    try {
+        return JSON.parse( atob( cookies.get('authToken').split('.')[1] ) );
+    } catch(e) {
+        return null
+    }
 }
 
 export {

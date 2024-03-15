@@ -5,8 +5,8 @@ import { method, sendRequest, getUserFromToken } from '@/service/UserAuth.js';
 import sweet from 'sweetalert';
 import { useCookies } from 'vue3-cookies';
 
-// const API = "http://localhost:4500";
-const API = "https://capstonebud.onrender.com";
+const API = "http://localhost:5000";
+// const API = "https://capstonebud.onrender.com";
 
 const { cookies } = useCookies();
 
@@ -15,7 +15,9 @@ export default createStore({
         user: null,
         display_nav: true,
         posts: null,
-        alertMsg: null
+        alertMsg: null,
+        formState: true,
+        isAdmin: false,
     },
     getters: {},
     mutations: {
@@ -27,6 +29,12 @@ export default createStore({
         },
         setPosts(state, value) {
             state.posts = value
+        },
+        setFormState(state, value) {
+            state.formState = value;
+        },
+        setAdmin(state, value){
+            state.isAdmin = value;
         }
     },
     actions: {
@@ -40,9 +48,14 @@ export default createStore({
             sweet( payload );
             cookies.remove('alertMsg');
         },
+        formState(context, state) {
+            context.commit('setFormState', state)
+        },
         // async signUpUser(context, payload){},
         async loadUser(context){
-            context.commit('setUser', getUserFromToken());
+            let user = getUserFromToken();
+            if( user.role == 'admin' ) context.commit('setAdmin', true);
+            context.commit('setUser', user);
         },
         async getPosts(context){
             try {
@@ -64,6 +77,7 @@ export default createStore({
                         alertMsg.text = data.msg
                         alertMsg.icon = "error"
 
+                        // cookies.remove('authToken');
                         cookies.set( "alertMsg", JSON.stringify(alertMsg) );
 
                         this.dispatch('redirect', '');
@@ -83,7 +97,45 @@ export default createStore({
         },
         async signInUser(context, payload){
             try {
-                let result = await fetch(`${API}/login`, {
+                let result = await sendRequest(`${API}/login`, "POST", payload);
+
+                let reply = await result.json();
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null,
+                }
+                console.log(reply)
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = "Error"
+                        alertMsg.text = "Invalid email or password"
+                        alertMsg.icon = "error"
+                        break;
+                    default:
+                        alertMsg.title = "Success"
+                        alertMsg.text = "Login successful"
+                        alertMsg.icon = "success"
+
+                        cookies.set('authToken', reply.token);
+                        this.dispatch('redirect', 'feed');
+                        break
+                }
+                sweet(alertMsg);
+            } catch(e) {
+                console.log(e);
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null,
+                    timer: 2000
+                }
+                sweet(alertMsg);
+            }
+        },
+        async registerUser(context, payload) {
+            try {
+                let result = await fetch(`${API}/register`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -91,12 +143,43 @@ export default createStore({
                     body: JSON.stringify(payload)
                 })
 
-                console.log(await result.json());
+                let reply = await result.json();
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null,
+                }
+                console.log(reply)
+                switch( true ){
+                    case reply.status >= 300:
+                        alertMsg.title = "Confirmation"
+                        alertMsg.text = reply.msg,
+                        alertMsg.icon = "info"
+                        break;
+                    case reply.status >= 400:
+                        alertMsg.title = "Error"
+                        alertMsg.text = reply.msg,
+                        alertMsg.icon = "error"
+                        break;
+                    default:
+                        alertMsg.title = "Success"
+                        alertMsg.text = reply.msg,
+                        alertMsg.icon = "success"
+                        break
+                }
+                sweet(alertMsg);
             } catch(e) {
                 console.log(e);
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null,
+                    timer: 2000
+                }
+                sweet(alertMsg);
             }
         },
-        // async verify(context, token){}
+        async getFeed(){}
     },
     modules: {}
 })

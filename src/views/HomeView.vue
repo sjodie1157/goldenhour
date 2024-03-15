@@ -1,7 +1,7 @@
 <template>
     <main class="flex-fill container-fluid" @load="alertConcern">
         <div class="row h-100">
-            <div class="col-lg-6 d-flex flex-column justify-content-evenly align-items-center">
+            <div class="col-lg-6 d-flex flex-column justify-content-top align-items-center">
                 <div class="d-flex flex-column mt-4">
                     <h4 class="display-4 fw-bold position-relative text-white d-flex flex-column">
                         CapstoneBud
@@ -10,7 +10,8 @@
                         </span>
                     </h4>
                 </div>
-                <LoginComp />
+                <RegisterComp v-if="formState" />
+                <LoginComp v-else />
             </div>
             <div class="col-lg-6 d-flex flex-column justify-content-center">
                 <PhoneDesignComp />
@@ -22,6 +23,7 @@
 <script>
 import PhoneDesignComp from '@/components/PhoneDesignComp.vue';
 import LoginComp from '@/components/LoginComp.vue';
+import RegisterComp from '@/components/RegisterComp.vue';
 
 import { useCookies } from 'vue3-cookies';
 
@@ -30,31 +32,27 @@ const {cookies} = useCookies();
 export default {
     name: 'HomeView',
     data() {
-        return {
-            registerForm: {
-                username: "",
-                email: "",
-                password: "",
-                confirmpassword: "",
-                age: 0,
-            }
-        }
     },
     mounted(){
         this.alertConcern();
+        this.checkLogin();
     },
     components: {
         PhoneDesignComp,
-        LoginComp
+        LoginComp,
+        RegisterComp
     },
     methods: {
-        register() {
-            this.$store.dispatch('signUpUser', this.registerForm);
-        },
         alertConcern(){
             let msg = cookies.get('alertMsg');
             if( msg ){
                 this.$store.dispatch('sweetAlert', msg );
+            }
+        },
+        checkLogin() {
+            let user = cookies.get('authToken');
+            if(user){
+                this.$store.dispatch('redirect', 'feed');
             }
         }
     },
@@ -64,6 +62,9 @@ export default {
         },
         alertMsg(){
             return this.$store.state.alertMsg;
+        },
+        formState(){
+            return this.$store.state.formState;
         }
     }
 }

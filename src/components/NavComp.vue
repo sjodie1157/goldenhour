@@ -1,7 +1,8 @@
 <template>
     <nav class="navbar navbar-lg-expand" v-if="navigation">
         <div class="container-fluid">
-            <router-link to="/login" class="m-0 p-0 btn border-0"><h5 class="fw-bold text-secondary m-0 py-3 text-white"><i class="bi bi-app m-2"></i>CapstoneBud</h5></router-link>
+            <router-link to="/login" class="m-0 p-0 btn border-0"><h5 class="fw-bold text-secondary m-0 py-4 text-white">
+                CapstoneBud</h5></router-link>
             <div class="d-flex justify-content-center">
                 <div class="position-relative mx-1" @mouseenter="linkEnter" @mouseleave="linkLeave">
                     <div class="transition position-absolute start-50 top-100 rounded-circle translate-middle bg-white" :class="{ 'p-1' : currentRoute == 0 }"></div>
@@ -17,8 +18,8 @@
                 </div>
             </div>
             <div>
-                <router-link to="/login" class="btn bg-white shadow rounded-pill m-1 text-secondary">Login</router-link>
-                <router-link to="/login" class="btn rounded-pill m-1 text-white">Register</router-link>
+                <router-link to="/" :class="{ 'bg-white' : !formState, 'shadow': !formState, 'text-secondary': !formState, 'text-white': formState }" class="btn rounded-pill m-1 border-0" @click="loginBtn">Login</router-link>
+                <router-link to="/" :class="{ 'bg-white' : formState, 'shadow': formState, 'text-secondary': formState, 'text-white': !formState }" class="btn rounded-pill m-1 border-0" @click="registerBtn">Register</router-link>
             </div>
         </div>
     </nav>
@@ -42,6 +43,9 @@ export default {
     computed: {
         navigation(){
             return this.$store.state.display_nav;
+        },
+        formState(){
+            return this.$store.state.formState;
         }
     },
     methods: {
@@ -91,12 +95,23 @@ export default {
                 this.currentRoute = this.route[pathname];
                 console.log('route: ', this.currentRoute)
             }
+        },
+        loginBtn() {
+            this.$store.dispatch('formState', false);
+        },
+        registerBtn() {
+            this.$store.dispatch('formState', true);
         }
     }
 }
 </script>
 <style scoped>
 .transition {
-    transition: 200ms ease;
+    transition: 400ms ease;
+}
+.logo {
+    background-image: url('@/assets/logo.png');
+    background-size: contain;
+    background-position: center;
 }
 </style>

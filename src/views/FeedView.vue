@@ -18,11 +18,10 @@
             <div class="col-6 bg-white px-3 vh-100 d-flex flex-column">
                 <PostNavComponent />
                 <div class="posts flex-fill overflow-auto" v-if="posts">
-                    <!-- {{ user }} -->
-                    {{ posts }}
                     <PostComponent v-for="post in posts" :key="post" :user='{
-                        username: user.username,
-                        profile: user.profile
+                        username: post.userName,
+                        profile: post.userProfile,
+                        currentUserPost: post.userName == user.username
                     }' :post='{
                         image: post.postMedia,
                         comment: post.postComment,
@@ -30,17 +29,11 @@
                         userID: post.userID,
                         postID: post.postID
                     }' />
-                    <!-- <PostComponent :user='{
-                        username: "MrBud",
-                        email: "solocyberengineer@gmail.com",
-                        profile: "https://i.ibb.co/thMjDB8/vitaliy-shevchenko-f-MNP7-XVcct0-unsplash.jpg"
-                    }' :post='{
-                        image: "",
-                        comment: "Just some generated text to test if this comment looks neat enough to look legit."
-                    }' /> -->
                 </div>
             </div>
-            <div class="col-3 bg-danger vh-100">asd</div>
+            <div class="col-3 bg-danger p-0">
+                <i class="bi bi-person-gear text-white fs-1"></i>
+            </div>
         </div>
     </div>
 </template>
