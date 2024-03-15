@@ -30,7 +30,7 @@
                     <small class="m-2">#countdown</small>
                     <small class="m-2">#2024</small>
                 </div>
-                <small class="fw-normal mx-2 mt-4 mb-3">{{post.comment}}</small>
+                <small class="fw-normal mx-2 mt-4 mb-3">{{ post.comment }}</small>
             </div>
             <div class="bg-white p-2 d-flex">
                 <button class="btn btn-light text-secondary mx-1">
@@ -41,11 +41,18 @@
                     <span><i class="bi bi-share-fill"></i></span> <small>Share</small></button> -->
             </div>
         </div>
-        <div ref="dropdown" show-dropdown="false" class="app-dropdown position-absolute bg-white top-0 end-0 py-0 rounded-2 w-25 m-5 shadow text-dark border border-secondary-subtle border-2 overflow-hidden">
-            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i class="bi bi-person-circle me-2"></i><small class="me-2">User Profile</small></button>
-            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i class="bi bi-clipboard me-2"></i><small class="me-2">Copy Link</small></button>
-            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-pencil-square me-2"></i><small class="me-2">Edit Post</small></button>
-            <button class="btn btn-danger w-100 py-2 my-0 border-0 rounded-0" v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-trash me-2"></i><small class="me-2">Delete</small></button>
+        <div ref="dropdown" show-dropdown="false"
+            class="app-dropdown position-absolute bg-white top-0 end-0 py-0 rounded-2 w-25 m-5 shadow text-dark border border-secondary-subtle border-2 overflow-hidden">
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
+                    class="bi bi-person-circle me-2"></i><small class="me-2">User Profile</small></button>
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
+                    class="bi bi-clipboard me-2"></i><small class="me-2">Copy Link</small></button>
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"
+                v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-pencil-square me-2"></i><small
+                    class="me-2">Edit Post</small></button>
+            <button class="btn btn-danger w-100 py-2 my-0 border-0 rounded-0"
+                v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-trash me-2"></i><small
+                    class="me-2">Delete</small></button>
         </div>
     </div>
 </template>
@@ -65,7 +72,7 @@ export default {
         toggleDropDown() {
             let elem = this.$refs.dropdown;
             let state = elem.getAttribute('show-dropdown')
-            if( state.toLowerCase() === "true" ){
+            if (state.toLowerCase() === "true") {
                 elem.style['display'] = 'none';
                 elem.setAttribute('show-dropdown', 'false');
             } else {
@@ -95,9 +102,11 @@ export default {
     background-position: center;
     background-size: cover;
 }
+
 .datetime {
     font-size: x-small;
 }
+
 .app-dropdown {
     display: none;
     animation-name: fadeIn;
@@ -111,6 +120,7 @@ export default {
         opacity: 0;
         transform: scale(0%) translate(100%, -100%);
     }
+
     100% {
         opacity: 1;
         transform: scale(100%);
