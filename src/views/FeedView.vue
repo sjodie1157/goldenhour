@@ -21,7 +21,8 @@
                     <PostComponent v-for="post in posts" :key="post" :user='{
                         username: post.userName,
                         profile: post.userProfile,
-                        currentUserPost: post.userName == user.username
+                        currentUserPost: post.userName == user.username,
+                        role: user.role
                     }' :post='{
                         image: post.postMedia,
                         comment: post.postComment,
@@ -40,7 +41,7 @@
 <script>
 import PostComponent from '@/components/PostComp.vue';
 import PostNavComponent from '@/components/PostNavComp.vue';
-import FeedNavComponent from '@/components/FeedNavComp.vue'
+import FeedNavComponent from '@/components/FeedNavComp.vue';
 import FeedSideNavComp from '@/components/FeedSideNavComp.vue';
 
 export default {

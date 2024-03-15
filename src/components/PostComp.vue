@@ -44,8 +44,8 @@
         <div ref="dropdown" show-dropdown="false" class="app-dropdown position-absolute bg-white top-0 end-0 py-0 rounded-2 w-25 m-5 shadow text-dark border border-secondary-subtle border-2 overflow-hidden">
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i class="bi bi-person-circle me-2"></i><small class="me-2">User Profile</small></button>
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i class="bi bi-clipboard me-2"></i><small class="me-2">Copy Link</small></button>
-            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" v-if="user.currentUserPost"><i class="bi bi-pencil-square me-2"></i><small class="me-2">Edit Post</small></button>
-            <button class="btn btn-danger w-100 py-2 my-0 border-0 rounded-0" v-if="user.currentUserPost"><i class="bi bi-trash me-2"></i><small class="me-2">Delete</small></button>
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-pencil-square me-2"></i><small class="me-2">Edit Post</small></button>
+            <button class="btn btn-danger w-100 py-2 my-0 border-0 rounded-0" v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-trash me-2"></i><small class="me-2">Delete</small></button>
         </div>
     </div>
 </template>
