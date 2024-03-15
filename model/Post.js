@@ -71,7 +71,8 @@ class Post {
         try {
             let user = verifyAToken(token);
 
-            const qry = `SELECT postID, postMedia, postComment, userID, postTime FROM Posts;`
+            // const qry = `SELECT postID, postMedia, postComment, userID, postTime FROM Posts;`;
+            const qry = `SELECT Users.userID, Users.userName, Users.userProfile, Posts.postID, Posts.postMedia, Posts.postComment, Posts.postTime FROM Posts INNER JOIN Users ON Posts.userID = Users.userID;`;
 
             db.query(qry, (err, result)=>{
                 if(err) throw err;
