@@ -54,8 +54,13 @@ export default createStore({
         // async signUpUser(context, payload){},
         async loadUser(context){
             let user = getUserFromToken();
-            if( user.role == 'admin' ) context.commit('setAdmin', true);
-            context.commit('setUser', user);
+            console.log(user)
+            if(user){
+                if( user.role == 'admin' ) context.commit('setAdmin', true);
+                context.commit('setUser', user);
+            } else {
+                this.dispatch('redirect', '')
+            }
         },
         async getPosts(context){
             try {
