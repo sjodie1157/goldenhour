@@ -198,6 +198,19 @@ export default createStore({
             } catch(e) {
                 console.log(e);
             }
+        },
+        async adminSearchUser(context, user){
+            try {
+                if(user != '') {
+                    let result = await sendRequest(`${API}/users/search/${user}`, "GET");
+                    let reply = await result.json();
+                    context.commit( 'setUsers', reply.result );
+                } else {
+                    this.dispatch('adminGetUsers');
+                }
+            } catch(e) {
+                console.log(e);
+            }
         }
     },
     modules: {}
