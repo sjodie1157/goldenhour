@@ -76,6 +76,7 @@ class Comment {
                 status: code.UNAUTHORIZED,
                 msg: "Please login in"
             })
+            return;
         } else {
             token = token.split(' ').at(-1);
         }
@@ -94,7 +95,7 @@ class Comment {
             });
         } catch (e) {
             console.log(e);
-            handleAuthError(e);
+            handleAuthError(e, req, res);
         }
     }
     async addComment(req, res) {

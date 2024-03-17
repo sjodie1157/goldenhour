@@ -1,18 +1,24 @@
-// https://api.imgbb.com/
+import multer from 'multer';
+import imgbbUploader from "imgbb-uploader";
+import util from "util";
 
-// client needs to upload the image to the server
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage
+});
 
-// key (required)
-// The API key.
-// image (required)
-// A binary file, base64 data, or a URL for an image. (up to 32 MB)
-// name (optional)
-// The name of the file, this is automatically detected if uploading a file with a POST and multipart / form-data
-// expiration (optional)
-// Enable this if you want to force uploads to be auto deleted after certain time (in seconds 60-15552000)
-
-function uploadImage(){}
+async function uploadImage(file) {
+    console.log('uploadfile: ', file)
+    
+    const options = {
+        apiKey: process.env.IMGBB_API_KEY,
+        name: file.originalname,
+        base64string: Buffer.from(file.buffer).toString('base64')
+    };
+    return await imgbbUploader(options)
+}
 
 export {
+    upload,
     uploadImage
 }
