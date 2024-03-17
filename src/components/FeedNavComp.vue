@@ -56,16 +56,13 @@
                 <span class="text-secondary mx-auto user-select-none">Account Settings</span>
             </button>
         </div>
-        <SettingsModal />
     </div>
 </template>
 <script>
-import SettingsModal from '@/components/SettingsModal.vue';
 
 export default {
     name: "FeedNavComponent",
     components: {
-        SettingsModal
     },
     computed: {
         isAdmin(){

@@ -1,10 +1,10 @@
 <template>
-    <div class="modal modal-xl fade" id="userEdit">
+    <div class="modal modal-xl fade" id="userAdd">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-3">
                 <div class="row g-0">
                     <div class="col-6 d-flex align-items-center justify-content-center">
-                        <h5 class="display-5 text-secondary fs-4 fw-medium text-center m-0">Manage User</h5>
+                        <h5 class="display-5 text-secondary fs-4 fw-medium text-center m-0">Add User</h5>
                     </div>
                     <div class="col-6 d-flex align-items-center justify-content-end">
                         <button type="button" class="btn-close border-0 shadow-none" data-bs-dismiss="modal"
@@ -29,7 +29,7 @@
                             <thead>
                             </thead>
                             <tbody>
-                                <tr class="py-3">
+                                <!-- <tr class="py-3">
                                     <td><span>User ID: </span></td>
                                     <td class="px-4"><span>{{ user.userID }}</span></td>
                                 </tr>
@@ -78,7 +78,7 @@
                                             </ul>
                                         </div>
                                     </td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -110,9 +110,6 @@
 <script>
 export default {
     name: "AdminUserEdit",
-    props: {
-        user: Object
-    },
     data() {
         return {
             userData: {}
@@ -121,11 +118,6 @@ export default {
     mounted() {
     },
     methods: {
-        changeUserRole(){
-            let user_update = this.user;
-            console.log(user_update)
-        },
-        saveChanges(){}
     }
 }
 </script>

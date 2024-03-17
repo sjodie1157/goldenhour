@@ -9,7 +9,7 @@ class method {
     patch = "PATCH";
 }
 
-async function sendRequest(url, method, data=null) {
+async function sendRequest(url, method, data=null, headers=null) {
     let authToken = cookies.get('authToken');
     let requestParams = {
         method: method,
@@ -19,10 +19,12 @@ async function sendRequest(url, method, data=null) {
         }
     }
 
+    if( headers ) requestParams.headers = headers;
     if( authToken ) requestParams.headers['Authorization'] = "Bearer " + authToken;
-    if( data ) requestParams['body'] = JSON.stringify(data);
-
+    if( data ) requestParams['body'] = ( requestParams.headers['Content-Type'] == 'application/json' ) ? JSON.stringify(data) : data;
+    
     let result = await fetch(url, requestParams);
+    console.log('result0')
     return result;
 }
 

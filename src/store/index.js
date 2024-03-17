@@ -18,7 +18,9 @@ export default createStore({
         alertMsg: null,
         formState: true,
         isAdmin: false,
-        users: null
+        users: null,
+        currentEditPost: null,
+        postComments: null
     },
     getters: {},
     mutations: {
@@ -39,6 +41,12 @@ export default createStore({
         },
         setUsers(state, value){
             state.users = value;
+        },
+        setEditPost(state, value){
+            state.currentEditPost = value;
+        },
+        setPostComments(state, value){
+            state.postComments = value;
         }
     },
     actions: {
@@ -55,7 +63,14 @@ export default createStore({
         formState(context, state) {
             context.commit('setFormState', state)
         },
-        // async signUpUser(context, payload){},
+        setCurrentEditPost(context, payload){
+            context.commit('setEditPost', payload);
+        },
+        logoutUser(){
+            cookies.remove('authToken');
+
+            this.dispatch('redirect', '')
+        },
         async loadUser(context){
             let user = getUserFromToken();
 
@@ -72,14 +87,27 @@ export default createStore({
                 this.dispatch('redirect', '')
             }
         },
+        async updatePosts(){
+            try {
+                if( this.state.posts ){
+                    let postCount = this.state.posts.length;
+                    let result = await sendRequest(`${API}/posts/updateposts/${postCount}`, "GET");
+                    let reply = await result.json();
+    
+                    if( reply.result && reply.result.length != postCount ){
+                        this.dispatch('getPosts');
+                    }
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
         async getPosts(context){
             try {
-                console.log(context)
-                
                 let result = await sendRequest(`${API}/posts`, method.get);
 
                 let data = await result.json();
-                // console.log(data)
+
                 let alertMsg = {
                     title: null,
                     text: null,
@@ -92,7 +120,6 @@ export default createStore({
                         alertMsg.text = data.msg
                         alertMsg.icon = "error"
 
-                        // cookies.remove('authToken');
                         cookies.set( "alertMsg", JSON.stringify(alertMsg) );
 
                         this.dispatch('redirect', '');
@@ -216,6 +243,160 @@ export default createStore({
                 }
             } catch(e) {
                 console.log(e);
+            }
+        },
+        async uploadImage(context, data){
+            try {
+                console.log(data)
+                // let result = await sendRequest(`${API}/post/upload`, "POST", data, {
+                //     "Content-Type": "multipart/form-data"
+                // });
+                let result = await fetch(`${API}/post/upload`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1yQnVkIiwiZW1haWwiOiJjYXBzdG9uZWJ1ZEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJhZ2UiOjI1LCJpYXQiOjE3MTA1MDI0ODMsImV4cCI6MTcxMTEwNzI4M30.4pDcECb-W-eC9l6qqfiT27SH_yaZ4JXxtyWBs32OKa0"
+                    },
+                    body: data
+                })
+                console.log("result: ", result)
+
+                let response = await result.json()
+                return response.result;
+            } catch(e) {
+                console.log(e);
+            }
+        },
+        async addPost(context, payload){
+            try {
+                let result = await sendRequest(`${API}/posts`, "POST", payload);
+                let reply = await result.json();
+                console.log('reply: ', reply)
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Posted';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async deletePost(context, postID){
+            try {
+                console.log(`${API}/post/${postID}`)
+                let result = await sendRequest(`${API}/post/${postID}`, "DELETE")
+                console.log('reply: ', result)
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Post Deleted';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        await this.dispatch('getPosts');
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e);
+            }
+        },
+        async editPost(context, payload){
+            try {
+                let postID = payload.postID;
+                let result = await sendRequest(`${API}/post/${postID}`, "PUT", payload);
+
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Post Edited';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        await this.dispatch('getPosts');
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async getPostComments(context, postID){
+            try {
+                let result = await sendRequest(`${API}/post/${postID}/comments`, "GET");
+                let reply = await result.json();
+
+                console.log('comments reply: ', reply)
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Post Edited';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        context.commit('setPostComments', reply.result);
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
             }
         }
     },

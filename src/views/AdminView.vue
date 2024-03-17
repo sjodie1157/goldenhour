@@ -6,14 +6,7 @@
         username: user.username,
         email: user.email
     }' />
-                <FeedNavComponent v-if="user.role == 'admin'" />
-                <div class="p-3 d-flex justify-content-center">
-                    <button
-                        class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
-                        <span><i class="bi bi-gear-fill ms-1"></i></span>
-                        <small class="mx-2">Settings</small>
-                    </button>
-                </div>
+            <FeedNavComponent v-if="user.role == 'admin'" />
             </div>
             <div class="col-9 bg-white px-3 vh-100 d-flex flex-column">
                 <div class="bg-dark-subtle my-3 p-3 rounded-1 fw-bold fs-5 text-white border border-2 text-center">Admin
@@ -34,8 +27,7 @@
                             </div>
                         </div>
                         <div class="col d-flex align-items-center justify-content-end">
-                            <button
-                                class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
+                            <button class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7" data-bs-target="#userAdd" data-bs-toggle="modal">
                                 <span><i class="bi bi-person-fill-add"></i></span>
                                 <small class="mx-2">Add User</small>
                             </button>
@@ -62,8 +54,6 @@
                                 <td class="d-flex flex-column justify-content-center align-items-center">
                                     <button class="btn btn-danger my-1" data-bs-target="#userEdit"
                                         data-bs-toggle="modal" @click="manageUser(user)">Manage</button>
-                                    <!-- <button class="btn btn-dark my-1 w-75">Suspend</button> -->
-                                    <!-- <button class="btn btn-dark my-1 w-75">Delete</button> -->
                                 </td>
                             </tr>
                         </tbody>
@@ -73,11 +63,15 @@
         </div>
     </div>
     <AdminUserEdit :user='manageUserData'/>
+    <AdminAddUser />
+    <SettingsModal />
 </template>
 <script>
 import FeedNavComponent from '@/components/FeedNavComp.vue';
 import FeedSideNavComp from '@/components/FeedSideNavComp.vue';
 import AdminUserEdit from '@/components/AdminUserEdit.vue';
+import AdminAddUser from '@/components/AdminAddUser.vue';
+import SettingsModal from '@/components/SettingsModal.vue';
 
 export default {
     name: "AdminView",
@@ -89,7 +83,9 @@ export default {
     components: {
         FeedNavComponent,
         FeedSideNavComp,
-        AdminUserEdit
+        AdminUserEdit,
+        AdminAddUser,
+        SettingsModal
     },
     mounted() {
         this.$store.state.display_nav = false;
