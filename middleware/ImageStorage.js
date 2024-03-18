@@ -1,6 +1,5 @@
 import multer from 'multer';
 import imgbbUploader from "imgbb-uploader";
-import util from "util";
 
 const storage = multer.memoryStorage();
 const upload = multer({

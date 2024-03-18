@@ -84,7 +84,7 @@ class Comment {
         try {
             let user = verifyAToken(token);
 
-            const getPostComments = `SELECT commentID, commentText, postID, userID FROM Comments WHERE postID = ?`;
+            const getPostComments = `SELECT commentID, commentText, postID, Comments.userID, Users.userName, Users.userProfile FROM Comments LEFT JOIN Users ON Comments.userID = Users.userID WHERE postID = ?`;
 
             db.query(getPostComments, [postID], (err, result) => {
                 if (err) throw err;
