@@ -10,7 +10,7 @@ class method {
 }
 
 async function sendRequest(url, method, data=null, headers=null) {
-    let authToken = cookies.get('authToken');
+    let authToken = cookies.get('authToken'); // getting from cookies
     let requestParams = {
         method: method,
         headers: {

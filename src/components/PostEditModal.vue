@@ -28,8 +28,6 @@
 export default {
     name: "PostEditModal",
     mounted() {
-        // this.postData.comment = this.post.comment;
-        // this.postData["postID"] = this.postID;
     },
     data(){
         return {

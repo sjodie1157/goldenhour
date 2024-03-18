@@ -20,6 +20,7 @@ export default createStore({
         isAdmin: false,
         users: null,
         currentEditPost: null,
+        currentUserPost: null,
         postComments: null
     },
     getters: {},
@@ -393,8 +394,63 @@ export default createStore({
                         alertMsg.icon = 'success';
 
                         context.commit('setPostComments', reply.result);
+                        context.commit('setCurrentUserPost', reply)
                         break;
                 }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async addPostComment(context, payload){
+            try {
+                let result = await sendRequest(`${API}/post/comment`, "POST", payload);
+                let reply = await result.json();
+
+                console.log(reply);
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Added Comment';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async deletePostComment(context, payload){
+            try {
+                // http://localhost:5000/post/3/comment/2
+                let result = await sendRequest(`${API}/post/${payload.postID}/comment/${payload.commentID}`, "DELETE");
+                let reply = await result.json();
+
+                console.log('some: ', reply)
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async editPostComment(context, payload) {
+            try {
+                // http://localhost:5000/post/3/comment/1
+                let result = await sendRequest(`${API}/post/${payload.postID}/comment/${payload.commentID}`, "PUT", payload);
+                let reply = await result.json();
+
+                console.log(reply)
             } catch(e) {
                 console.log(e)
             }

@@ -65,8 +65,8 @@ export default {
         await this.$store.dispatch('loadUser');
         await this.$store.dispatch('getPosts');
 
-        let updater = setInterval(()=>{
-            this.$store.dispatch('updatePosts');
+        let updater = setInterval(async ()=>{
+            await this.$store.dispatch('updatePosts');
         }, 10000);
 
         console.log(updater);

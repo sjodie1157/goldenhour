@@ -54,7 +54,7 @@
                     class="bi bi-person-circle me-2"></i><small class="me-2">User Profile</small></button>
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
                     class="bi bi-clipboard me-2"></i><small class="me-2">Copy Link</small></button>
-            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" v-if="user.hasFullOptions"><i
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" data-bs-target="#commentsModal" data-bs-toggle="modal" @click="getComments"><i
                     class="bi bi-chat-text-fill me-2"></i><small class="me-2">Comments</small></button>
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" v-if="user.hasFullOptions"
                 data-bs-target="#postEdit" data-bs-toggle="modal"><i class="bi bi-pencil-square me-2"></i><small
@@ -100,6 +100,9 @@ export default {
             await this.$store.dispatch('setCurrentEditPost', this.post)
         },
         async getComments(){
+            let data = { ...this.post, ...this.user };
+
+            await this.$store.dispatch('setCurrentEditPost', data);
             await this.$store.dispatch('getPostComments', this.post.postID)
         }
     }
