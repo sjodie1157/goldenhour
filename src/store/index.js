@@ -4,6 +4,7 @@ import {
 import { method, sendRequest, getUserFromToken } from '@/service/UserAuth.js';
 import sweet from 'sweetalert';
 import { useCookies } from 'vue3-cookies';
+import router from '@/router';
 
 // const API = "http://localhost:5000";
 const API = "https://capstonebud.onrender.com";
@@ -55,7 +56,7 @@ export default createStore({
             context.commit('setNavDisplay', payload);
         },
         redirect(context, route){
-            location.href = `${location.origin}/${route}`;
+            router.push(`/${route}`);
         },
         sweetAlert(context, payload){
             sweet( payload );
