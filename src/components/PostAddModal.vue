@@ -13,7 +13,7 @@
                         <div class="p-5">
                             <div class="p-5">
                                 <div class="position-absolute top-50 start-50 translate-middle">
-                                    <h5 class="display-5 fs-3 text-white">IMG</h5>
+                                    <h5 class="display-5 fs-3 text-white"><i class="bi bi-image-fill"></i></h5>
                                 </div>
                             </div>
                         </div>

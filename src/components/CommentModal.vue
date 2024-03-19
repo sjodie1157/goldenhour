@@ -52,7 +52,7 @@
                     </form>
                     <h5 class="display-5 fw-light fs-5 py-3">Comments</h5>
                     <div v-if="comments" class="py-1 bg-secondary-subtle p-2 rounded-2">
-                        <div class="py-4 px-2 1 d-flex" v-for="comment in comments" :key="comment">
+                        <div class="py-2 px-2 1 d-flex" v-for="comment in comments" :key="comment">
                             <!-- {{comment}} -->
                             <!-- { "commentID": 4, "commentText": "I'm good MrBud thanks for asking", "postID": 7, "userID": 8, "userName": "RandomUser", "userProfile": null } -->
                             <!-- {{user}} -->

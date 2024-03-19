@@ -5,8 +5,8 @@ import { method, sendRequest, getUserFromToken } from '@/service/UserAuth.js';
 import sweet from 'sweetalert';
 import { useCookies } from 'vue3-cookies';
 
-const API = "http://localhost:5000";
-// const API = "https://capstonebud.onrender.com";
+// const API = "http://localhost:5000";
+const API = "https://capstonebud.onrender.com";
 
 const { cookies } = useCookies();
 
@@ -220,6 +220,41 @@ export default createStore({
                     timer: 2000
                 }
                 sweet(alertMsg);
+            }
+        },
+        async updateUser(context, payload){
+            try {
+                console.log('payload: ', payload);
+                let result = await sendRequest(`${API}/user/${payload.id}`, "PATCH", payload);
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                let {new_token} = reply;
+
+                cookies.set('authToken', new_token);
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = "Error";
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = "error";
+                        sweet(alertMsg)
+                        break;
+                        default:
+                            alertMsg.title = "Updated Successfully";
+                            alertMsg.text = reply.msg;
+                            alertMsg.icon = "success";
+                        sweet(alertMsg);
+                        break;
+                }
+                
+            } catch(e) {
+                console.log(e);
             }
         },
         async getFeed(){},
