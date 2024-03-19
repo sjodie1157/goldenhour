@@ -16,22 +16,29 @@ usersRouter.get('/search/:query', (req, res)=>{
     try {
         user.searchUser(req, res);
     } catch(e) {
-        console.log(e)
+        console.log(e);
     }
 })
 
 userRouter.get('/:userID', (req, res)=>{
     try {
-        user.fetchUser(req, res)
+        user.fetchUser(req, res);
+    } catch(e) {
+        console.log(e)
+    }
+})
+userRouter.get('/profile/me', (req, res)=>{
+    try {
+        user.fetchLoggedInUser(req, res);
     } catch(e) {
         console.log(e)
     }
 })
 userRouter.patch('/:userID', bodyParser.json(), (req, res)=>{
     try {
-        user.updateUser(req, res)
+        user.updateUser(req, res);
     } catch(e) {
-        console.log(e)
+        console.log(e);
     } 
 })
 userRouter.delete('/:userID', (req, res)=>{

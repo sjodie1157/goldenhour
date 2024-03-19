@@ -15,7 +15,7 @@ import { user } from './model/index.js';
 
 config();
 
-const PORT = +process.env.PORT || 4500;
+const PORT = +process.env.PORT || 5000;
 
 const app = express();
 

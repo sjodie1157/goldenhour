@@ -11,8 +11,7 @@ import {
 import {
     hash,
     compare,
-    compareSync,
-    hashSync
+    compareSync
 } from 'bcrypt';
 import {
     code
@@ -35,15 +34,65 @@ const dbAsync = util.promisify(db.query).bind(db);
 class User {
     // admin will be able to block/unblock users even suspend(ban);
     // privs are: user, premium(can have a video on there profile), admin
-    async fetchUser(req, res) {
+    async fetchLoggedInUser(req, res){
         let token = req.headers['authorization'];
-        let _userID = +req.params.userID;
 
         if( !token ){
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
                 msg: "Please login in"
             })
+        } else {
+            token = token.split(' ').at(-1);
+        }
+
+        try {
+            let user = verifyAToken(token);
+
+            const getUser = `SELECT userID, userName, userEmail, userRole, userAge, userProfile FROM Users WHERE userEmail = ?;`;
+
+            db.query(getUser, [user.email], (err, result)=>{
+                if(err) throw err
+
+                let {userID, userName, userEmail, userRole, userAge, userProfile} = result[0];
+
+                let payload = {
+                    id: userID,
+                    username: userName,
+                    email: userEmail,
+                    role: userRole,
+                    age: userAge,
+                    profile: userProfile
+                }
+
+                res.status(code.OK).send({
+                    status: code.OK,
+                    result: payload
+                })
+            })
+        } catch(e) {
+            console.log(e)
+            handleAuthError(e, req, res);
+        }
+    }
+    async fetchUser(req, res) {
+        let token = req.headers['authorization'];
+        let _userID = +req.params.userID;
+
+        if( isNaN(_userID) ){
+            res.status(code.NOTFOUND).send({
+                status: code.NOTFOUND,
+                msg: "User not found"
+            })
+            return;
+        }
+
+        if( !token ){
+            res.status(code.UNAUTHORIZED).send({
+                status: code.UNAUTHORIZED,
+                msg: "Please login in"
+            })
+            return;
         } else {
             token = token.split(' ').at(-1);
         }
@@ -211,10 +260,10 @@ class User {
 
         try {
             let user = verifyAToken(token);
-            const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole FROM Users WHERE userEmail = ?;`;
+            const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userEmail = ?;`;
 
             let result = await dbAsync(getUserID, [user.email]);
-            const { userID, userEmail, userName, userPass, userAge, userRole } = result[0];
+            const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
 
             if( data.password ) data.password = await hash(data.password, ROUNDS);
             
@@ -230,7 +279,8 @@ class User {
                     userName: (data.username) ? data.username : userName, 
                     userPass: (data.password) ? data.password : userPass, 
                     userAge: (data.age) ? data.age : userAge,
-                    userRole: (user.role == 'admin') ? data.role : userRole
+                    userRole: (user.role == 'admin') ? data.role : userRole,
+                    userProfile: (data.profile) ? data.profile : userProfile
                 }
 
                 let new_token = createToken(tokenPayload, '7d');
@@ -281,6 +331,14 @@ class User {
 
         try {
             let user = verifyAToken(token);
+
+            if(user.email == 'capstonebud@gmail.com'){
+                res.status(code.FORBIDDEN).send({
+                    status: code.FORBIDDEN,
+                    msg: "Imagine you delete this account, this app will crash."
+                })
+                return;
+            }
 
             const getUserPassword = `SELECT userID, userName, userEmail, userAge, userPass, userProfile FROM Users WHERE userEmail = ?;`;
             let result = await dbAsync(getUserPassword, [user.email]);
@@ -343,8 +401,9 @@ class User {
         try {
             let user = verifyAToken(token);
             let applyRole = 'AND userRole = "user"';
+            let applyEmail = ', userEmail';
 
-            const qry = `SELECT userID, userName FROM Users WHERE userName like ? ${ (user.role != 'admin') ? applyRole : '' };`;
+            const qry = `SELECT userID, userName, userRole${ (user.role == 'admin') ? applyEmail : '' }, userProfile FROM Users WHERE userName like ? ${ (user.role != 'admin') ? applyRole : '' };`;
 
             db.query(qry, [searchQuery+"%"], (err, result)=>{
                 if(err) throw err;
@@ -386,7 +445,7 @@ class User {
                     role: userRole,
                     age: userAge
                 }
-    
+
                 let token = createToken(payload, '7d');
 
                 res.status(code.OK).send({
@@ -414,7 +473,7 @@ class User {
     logout(req, res) {
         // there has to be a token here, if not then how did they get here without login
         // this will blacklist a jwt token until it expires
-        
+
         // this will logout the user
     }
     upgradeUser(req, res) {
