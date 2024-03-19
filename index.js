@@ -54,6 +54,13 @@ app.post('/register', (req, res)=>{
         console.log(e)
     }
 })
+app.get('/verify', (req, res)=>{
+    try {
+        user.verifyUserEmail(req, res);
+    } catch(e) {
+        console.log(e)
+    }
+})
 
 app.use('/user', userRouter);
 app.use('/users', usersRouter);
