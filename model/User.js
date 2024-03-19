@@ -205,11 +205,12 @@ class User {
         })
     }
     verifyUserEmail(req, res) {
-        let token = req.headers['authorization'];
+        let { token } = req.query;
+        console.log(token)
 
         try {
             let user = verifyAToken(token);
-            // console.log(user);
+            console.log(user);
             // put the user into the database.
             let qry = `INSERT INTO Users SET ?`;
 
@@ -224,16 +225,20 @@ class User {
 
             db.query(qry, [payload], (err) => {
                 if (err) throw err
-
                 delete payload['userPass'];
-                token = createToken(payload, '7d');
-                res.json({
-                    username: user.userName,
-                    email: user.userEmail,
-                    age: user.userAge,
-                    role: user.userRole,
-                    token
-                })
+                // token = createToken(payload, '7d');
+                // res.json({
+                //     username: user.userName,
+                //     email: user.userEmail,
+                //     age: user.userAge,
+                //     role: user.userRole,
+                //     token
+                // })
+                res.send(`account has been verified. You will be redirected shortly to log into your account`);
+
+                setTimeout(()=>{
+                    window.location.href = 'https://capstonebud.web.app'
+                },5000)
 
             })
             // return a session token
