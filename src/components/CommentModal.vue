@@ -55,6 +55,7 @@
                         <div class="py-4 px-2 1 d-flex" v-for="comment in comments" :key="comment">
                             <!-- {{comment}} -->
                             <!-- { "commentID": 4, "commentText": "I'm good MrBud thanks for asking", "postID": 7, "userID": 8, "userName": "RandomUser", "userProfile": null } -->
+                            <!-- {{user}} -->
                             <div class="d-flex w-100">
                                 <div>
                                     <div class="profile_picture position-relative m-1 bg-secondary rounded-circle p-4"
@@ -66,16 +67,21 @@
                                 <div class="d-flex flex-column align-items-start">
                                     <small class="text-secondary flex-fill p-1 mx-4 rounded-2 align-vertical">{{
                         comment.userName
-                    }}&nbsp;-<span :commentid="comment.commentID" @click="deleteComment"
+                    }}<span :commentid="comment.commentID" v-if="user.id == comment.userID || user.role == 'admin'" @click="deleteComment"
                                             class="delete-comment text-danger align-vertical"
-                                            style="font-size: small">&nbsp;delete</span></small>
-                                            <small class=" d-flex flex-column bg-white text-secondary flex-fill px-2 border border-secondary-subtle border-2 py-1 mx-4 rounded-2">
-                                                <span v-if="displayEditBtn">
-                                                    {{ comment.commentText }}
-                                                </span>
-                                                <textarea v-else v-model="comment.commentText" class="form-control" name="" id="" cols="30" rows="10" placeholder="edit your comment" style="resize: none;"></textarea>
-                                        <span v-if="displayEditBtn" class="edit-comment text-primary text-end" style="font-size: small" :commentid="comment.commentID" @click="editComment">edit</span>
-                                        <span v-else class="edit-comment text-primary text-end" style="font-size: small" :comment="comment.commentText" :commentid="comment.commentID" @click="submitComment">submit</span>
+                                            style="font-size: small">&nbsp;&nbsp;delete</span></small>
+                                    <small edit="false" :commentid="comment.commentID" :userCommentID="comment.userID" class=" d-flex flex-column bg-white text-secondary flex-fill px-2 border border-secondary-subtle border-2 py-1 mx-4 rounded-2">
+                                        <span style="display: block">
+                                            {{ comment.commentText }}
+                                        </span>
+                                        <textarea v-model="comment.commentText" class="form-control" cols="30" rows="10" placeholder="edit your comment"
+                                            style="resize: none;display: none"></textarea>
+                                        <span v-if="user.id == comment.userID || user.role == 'admin'" class="edit-comment text-primary text-end" style="font-size: small;display: block;" :commentid="comment.commentID" @click="editComment">
+                                            edit
+                                        </span>
+                                        <span class="edit-comment text-primary text-end" style="font-size: small;display: none;"
+                                            :comment="comment.commentText" :commentid="comment.commentID"
+                                            @click="submitComment">submit</span>
                                     </small>
                                 </div>
                             </div>
@@ -91,7 +97,6 @@ export default {
     name: "CommentModal",
     data() {
         return {
-            displayEditBtn: true
         }
     },
     mounted() {
@@ -117,11 +122,54 @@ export default {
             await this.$store.dispatch('deletePostComment', payload);
             await this.$store.dispatch('getPostComments', payload.postID);
         },
-        async editComment(){
-            this.displayEditBtn = false;
+        async editComment(event) {
+            let commentElem = event.target.parentElement;
+            let otherElems = commentElem.children;
+
+            let commentID = commentElem.getAttribute('commentid');
+            let userCommentID = commentElem.getAttribute('userCommentID');
+
+            console.log(userCommentID)
+            console.log('user: ', this.user);
+
+            let state = commentElem.getAttribute('edit');
+
+            alert(commentID);
+
+            if( state.toLowerCase() === 'true' ){ // not being edited
+                otherElems[0].style['display'] = 'block'
+                otherElems[1].style['display'] = 'none'
+                otherElems[2].style['display'] = 'block'
+                otherElems[3].style['display'] = 'none'
+                commentElem.setAttribute('edit', "false");
+            } else { // being edited
+                otherElems[0].style['display'] = 'none';
+                otherElems[1].style['display'] = 'block'
+                otherElems[2].style['display'] = 'none'
+                otherElems[3].style['display'] = 'block'
+                commentElem.setAttribute('edit', "true");
+            }
         },
-        async submitComment(event){
-            this.displayEditBtn = true;
+        async submitComment(event) {
+            let commentElem = event.target.parentElement;
+            let otherElems = commentElem.children;
+
+            let state = commentElem.getAttribute('edit');
+
+            if( state.toLowerCase() === 'true' ){
+                otherElems[0].style['display'] = 'block'
+                otherElems[1].style['display'] = 'none'
+                otherElems[2].style['display'] = 'block'
+                otherElems[3].style['display'] = 'none'
+                commentElem.setAttribute('edit', "false");
+            } else {
+                otherElems[0].style['display'] = 'none'
+                otherElems[1].style['display'] = 'block'
+                otherElems[2].style['display'] = 'none'
+                otherElems[3].style['display'] = 'block'
+                commentElem.setAttribute('edit', "true");
+            }
+
             let commentID = event.target.getAttribute('commentid');
             let payload = {
                 postID: this.post.postID,
@@ -132,6 +180,9 @@ export default {
         }
     },
     computed: {
+        user(){
+            return this.$store.state.user;
+        },
         post() {
             return this.$store.state.currentEditPost;
         },
@@ -151,6 +202,7 @@ export default {
     transition: 300ms;
     cursor: pointer;
 }
+
 .edit-comment {
     transition: 300ms;
     cursor: pointer;
