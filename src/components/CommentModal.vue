@@ -60,9 +60,9 @@
                                 <div>
                                     <div class="profile_picture position-relative m-1 bg-secondary rounded-circle p-4"
                                         :style='{
-                        "background-image": `url(${post.profile})`
+                        "background-image": `url(${comment.userProfile})`
                     }'><i class="bi bi-person-fill position-absolute fs-4 top-50 start-50 translate-middle text-white"
-                                            v-if="!post.profile"></i></div>
+                                            v-if="!comment.userProfile"></i></div>
                                 </div>
                                 <div class="d-flex flex-column align-items-start">
                                     <small class="text-secondary flex-fill p-1 mx-4 rounded-2 align-vertical">{{
@@ -83,6 +83,7 @@
                                             :comment="comment.commentText" :commentid="comment.commentID"
                                             @click="submitComment">submit</span>
                                     </small>
+                                    <span style="font-size: x-small" class="align-middle px-4 mx-1 py-1 text-secondary">{{ convertTimeStamp(comment.commentTime) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -112,6 +113,21 @@ export default {
 
             await this.$store.dispatch('addPostComment', payload);
             await this.$store.dispatch('getPostComments', payload.postID);
+        },
+        convertTimeStamp(timestamp) {
+            let date = new Date(timestamp);
+            let options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                timeZone: 'UTC'
+            };
+
+            let formattedDate = date.toLocaleDateString('en-US', options);
+
+            return formattedDate
         },
         async deleteComment(event) {
             let commentID = event.target.getAttribute('commentid');
