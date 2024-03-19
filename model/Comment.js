@@ -13,6 +13,7 @@ import {
     handleAuthError
 } from '../middleware/ErrorHandling.js';
 import util from 'util';
+import { encodeMsg, decodeMsg } from '../middleware/Utils.js';
 
 const dbAsync = util.promisify(db.query).bind(db);
 
@@ -84,10 +85,11 @@ class Comment {
         try {
             let user = verifyAToken(token);
 
-            const getPostComments = `SELECT commentID, commentText, postID, Comments.userID, Users.userName, Users.userProfile FROM Comments LEFT JOIN Users ON Comments.userID = Users.userID WHERE postID = ?`;
+            const getPostComments = `SELECT commentID, CONVERT(from_base64(commentText) USING utf8) AS commentText, Comments.commentTime, postID, Comments.userID, Users.userName, Users.userProfile FROM Comments LEFT JOIN Users ON Comments.userID = Users.userID WHERE postID = ? ORDER BY Comments.commentTime DESC`;
 
             db.query(getPostComments, [postID], (err, result) => {
                 if (err) throw err;
+                console.log(result)
                 res.status(code.OK).send({
                     status: code.OK,
                     result
@@ -110,14 +112,18 @@ class Comment {
         } else {
             token = token.split(' ').at(-1);
         }
-
+        console.log(data)
         if ( !data.comment || !data.postID ) {
             res.status(code.BADREQUEST).send({
                 status: code.BADREQUEST,
                 msg: "Please provide a comment and postID"
             })
             return;
+        } else {
+            data.comment = encodeMsg(data.comment)
         }
+
+        console.log(data.comment)
 
         try {
             let user = verifyAToken(token);
@@ -166,7 +172,6 @@ class Comment {
         let commentID = +req.params.cID;
         let data = req.body;
 
-        
         if (!token) {
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
@@ -183,6 +188,8 @@ class Comment {
                 msg: "Invalid comment"
             })
             return;
+        } else {
+            data.comment = encodeMsg(data.comment)
         }
 
         try {
