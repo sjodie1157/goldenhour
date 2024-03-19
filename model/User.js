@@ -11,8 +11,7 @@ import {
 import {
     hash,
     compare,
-    compareSync,
-    hashSync
+    compareSync
 } from 'bcrypt';
 import {
     code
@@ -261,10 +260,10 @@ class User {
 
         try {
             let user = verifyAToken(token);
-            const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole FROM Users WHERE userEmail = ?;`;
+            const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userEmail = ?;`;
 
             let result = await dbAsync(getUserID, [user.email]);
-            const { userID, userEmail, userName, userPass, userAge, userRole } = result[0];
+            const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
 
             if( data.password ) data.password = await hash(data.password, ROUNDS);
             
@@ -280,7 +279,8 @@ class User {
                     userName: (data.username) ? data.username : userName, 
                     userPass: (data.password) ? data.password : userPass, 
                     userAge: (data.age) ? data.age : userAge,
-                    userRole: (user.role == 'admin') ? data.role : userRole
+                    userRole: (user.role == 'admin') ? data.role : userRole,
+                    userProfile: (data.profile) ? data.profile : userProfile
                 }
 
                 let new_token = createToken(tokenPayload, '7d');
