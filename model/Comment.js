@@ -230,6 +230,7 @@ class Comment {
         let postID = +req.params.postID;
         let commentID = +req.params.cID;
 
+        
         if (!token) {
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
@@ -239,9 +240,7 @@ class Comment {
         } else {
             token = token.split(' ').at(-1);
         }
-
-        console.log(token)
-
+        
         try {
             let user = verifyAToken(token);
 
@@ -253,7 +252,6 @@ class Comment {
                 userRole
             } = result[0];
 
-            //check if post exist
             const getPost = `SELECT postID, commentID, userID FROM Comments WHERE postID = ? AND commentID = ?`;
 
             let post = await dbAsync(getPost, [postID, commentID]);
@@ -264,7 +262,8 @@ class Comment {
                 })
                 return;
             }
-            if( userID == post.userID || (user.role == 'admin' && userRole == 'admin') ){
+            let postUserID = post[0].userID;
+            if( userID == postUserID || (user.role == 'admin' && userRole == 'admin') ){
                 const deletePostComment = `DELETE FROM Comments WHERE postID = ? AND commentID = ?`;
 
                 db.query(deletePostComment, [postID, commentID], (err, result) => {
