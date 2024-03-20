@@ -22,7 +22,8 @@ export default createStore({
         users: null,
         currentEditPost: null,
         currentUserPost: null,
-        postComments: null
+        postComments: null,
+        postSearch: null
     },
     getters: {},
     mutations: {
@@ -34,6 +35,7 @@ export default createStore({
         },
         setPosts(state, value) {
             state.posts = value
+            state.postSearch = value
         },
         setFormState(state, value) {
             state.formState = value;
@@ -49,11 +51,17 @@ export default createStore({
         },
         setPostComments(state, value){
             state.postComments = value;
+        },
+        setPostSearch(state, value){
+            state.postSearch = value;
         }
     },
     actions: {
         navbar(context, payload){
             context.commit('setNavDisplay', payload);
+        },
+        setPostSearch(context, payload){
+            context.commit('setPostSearch', payload)
         },
         redirect(context, route){
             router.push(`/${route}`);

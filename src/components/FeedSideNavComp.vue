@@ -1,10 +1,10 @@
 <template>
-    <div class="sideNav bg-primary-subtle" v-if="user">
-        <div class="profile_and_search p-3">
-            <div class="input-group mb-3">
+    <div class="sideNav bg-primary-subtle" v-if="user && posts">
+        <div class="profile_and_search p-4">
+            <div class="input-group mb-3 px-4">
                 <span class="input-group-text border-0" id="search"><i
                         class="bi bi-search text-secondary"></i></span>
-                <input class="form-control shadow-none border-0" type="text" placeholder="search a post"
+                <input @input="search" v-model="searchInput" class="form-control shadow-none border-0" type="text" placeholder="search a user or post"
                     aria-describedby="search" />
             </div>
             <div class="mt-5 mb-3 d-flex d-flex justify-content-center">
@@ -28,14 +28,37 @@
 <script scoped>
 export default {
     name: "FeedSideNavComp",
+    data(){
+        return {
+            searchInput: ""
+        }
+    },
     computed: {
         user(){
             return this.$store.state.user;
+        },
+        users(){
+            return this.$store.state.users;
+        },
+        posts(){
+            return this.$store.state.posts;
+        },
+        postSearch(){
+            return this.$store.state.postSearch;
         }
     },
     methods: {
         openSettingsModal(){
             this.$refs.openSettings.click();
+        },
+        search(){
+            let _searchInput = this.searchInput.toLowerCase();
+            console.log('search: ', _searchInput)
+            let posts = this.posts.filter( (post)=>{
+                return post.postComment.toLowerCase().includes(_searchInput) || post.userName.toLowerCase().includes(_searchInput)
+            } )
+            this.$store.dispatch('setPostSearch', posts)
+
         }
     }
 }

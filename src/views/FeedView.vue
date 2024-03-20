@@ -10,8 +10,8 @@
             </div>
             <div class="col-6 bg-white px-3 vh-100 d-flex flex-column">
                 <PostNavComponent />
-                <div class="posts flex-fill overflow-auto pb-4" v-if="posts && user">
-                    <PostComponent v-for="post in posts" :key="post" :user='{
+                <div class="posts flex-fill overflow-auto pb-4" v-if="postSearch && user">
+                    <PostComponent v-for="post in postSearch" :key="post" :user='{
                         username: post.userName,
                         profile: post.userProfile,
                         hasFullOptions: (post.userID == user.id) || user.role == "admin"
@@ -76,7 +76,11 @@ export default {
             return this.$store.state.user;
         },
         posts() {
-            return this.$store.state.posts;
+            let posts = this.$store.state.posts;
+            return posts;
+        },
+        postSearch() {
+            return this.$store.state.postSearch;
         }
     },
     methods: {
