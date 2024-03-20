@@ -4,6 +4,7 @@ import {
 import { method, sendRequest, getUserFromToken } from '@/service/UserAuth.js';
 import sweet from 'sweetalert';
 import { useCookies } from 'vue3-cookies';
+import router from '@/router';
 
 const API = "http://localhost:5000";
 // const API = "https://capstonebud.onrender.com";
@@ -18,7 +19,10 @@ export default createStore({
         alertMsg: null,
         formState: true,
         isAdmin: false,
-        users: null
+        users: null,
+        currentEditPost: null,
+        currentUserPost: null,
+        postComments: null
     },
     getters: {},
     mutations: {
@@ -39,6 +43,12 @@ export default createStore({
         },
         setUsers(state, value){
             state.users = value;
+        },
+        setEditPost(state, value){
+            state.currentEditPost = value;
+        },
+        setPostComments(state, value){
+            state.postComments = value;
         }
     },
     actions: {
@@ -46,7 +56,7 @@ export default createStore({
             context.commit('setNavDisplay', payload);
         },
         redirect(context, route){
-            location.href = `${location.origin}/${route}`;
+            router.push(`/${route}`);
         },
         sweetAlert(context, payload){
             sweet( payload );
@@ -55,10 +65,33 @@ export default createStore({
         formState(context, state) {
             context.commit('setFormState', state)
         },
-        // async signUpUser(context, payload){},
+        setCurrentEditPost(context, payload){
+            context.commit('setEditPost', payload);
+        },
+        logoutUser(){
+            cookies.remove('authToken');
+
+            this.dispatch('redirect', '')
+        },
         async loadUser(context){
             let user = getUserFromToken();
-            console.log(user)
+
+            let result = await sendRequest(`${API}/user/profile/me`, "GET");
+            let reply = await result.json();
+
+            console.log(reply)
+
+            switch( true ){
+                case reply.status >= 400:
+                    this.store.dispatch('redirect', '')
+                    return;
+                default:
+                    break
+            }
+
+            user = reply.result;
+
+            console.log('user profile: ',user)
             if(user){
                 if( user.role == 'admin' ) context.commit('setAdmin', true);
                 context.commit('setUser', user);
@@ -66,14 +99,27 @@ export default createStore({
                 this.dispatch('redirect', '')
             }
         },
+        async updatePosts(){
+            try {
+                if( this.state.posts ){
+                    let postCount = this.state.posts.length;
+                    let result = await sendRequest(`${API}/posts/updateposts/${postCount}`, "GET");
+                    let reply = await result.json();
+    
+                    if( reply.result && reply.result.length != postCount ){
+                        this.dispatch('getPosts');
+                    }
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
         async getPosts(context){
             try {
-                console.log(context)
-                
                 let result = await sendRequest(`${API}/posts`, method.get);
 
                 let data = await result.json();
-                // console.log(data)
+
                 let alertMsg = {
                     title: null,
                     text: null,
@@ -86,7 +132,6 @@ export default createStore({
                         alertMsg.text = data.msg
                         alertMsg.icon = "error"
 
-                        // cookies.remove('authToken');
                         cookies.set( "alertMsg", JSON.stringify(alertMsg) );
 
                         this.dispatch('redirect', '');
@@ -188,6 +233,41 @@ export default createStore({
                 sweet(alertMsg);
             }
         },
+        async updateUser(context, payload){
+            try {
+                console.log('payload: ', payload);
+                let result = await sendRequest(`${API}/user/${payload.id}`, "PATCH", payload);
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                let {new_token} = reply;
+
+                cookies.set('authToken', new_token);
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = "Error";
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = "error";
+                        sweet(alertMsg)
+                        break;
+                        default:
+                            alertMsg.title = "Updated Successfully";
+                            alertMsg.text = reply.msg;
+                            alertMsg.icon = "success";
+                        sweet(alertMsg);
+                        break;
+                }
+                
+            } catch(e) {
+                console.log(e);
+            }
+        },
         async getFeed(){},
         async adminGetUsers(context){
             try {
@@ -210,6 +290,215 @@ export default createStore({
                 }
             } catch(e) {
                 console.log(e);
+            }
+        },
+        async uploadImage(context, data){
+            try {
+                console.log(data)
+                // let result = await sendRequest(`${API}/post/upload`, "POST", data, {
+                //     "Content-Type": "multipart/form-data"
+                // });
+                let result = await fetch(`${API}/post/upload`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1yQnVkIiwiZW1haWwiOiJjYXBzdG9uZWJ1ZEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJhZ2UiOjI1LCJpYXQiOjE3MTA1MDI0ODMsImV4cCI6MTcxMTEwNzI4M30.4pDcECb-W-eC9l6qqfiT27SH_yaZ4JXxtyWBs32OKa0"
+                    },
+                    body: data
+                })
+                console.log("result: ", result)
+
+                let response = await result.json()
+                return response.result;
+            } catch(e) {
+                console.log(e);
+            }
+        },
+        async addPost(context, payload){
+            try {
+                let result = await sendRequest(`${API}/posts`, "POST", payload);
+                let reply = await result.json();
+                console.log('reply: ', reply)
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Posted';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async deletePost(context, postID){
+            try {
+                console.log(`${API}/post/${postID}`)
+                let result = await sendRequest(`${API}/post/${postID}`, "DELETE")
+                console.log('reply: ', result)
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Post Deleted';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        await this.dispatch('getPosts');
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e);
+            }
+        },
+        async editPost(context, payload){
+            try {
+                let postID = payload.postID;
+                let result = await sendRequest(`${API}/post/${postID}`, "PUT", payload);
+
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Post Edited';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        await this.dispatch('getPosts');
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async getPostComments(context, postID){
+            try {
+                let result = await sendRequest(`${API}/post/${postID}/comments`, "GET");
+                let reply = await result.json();
+
+                console.log('comments reply: ', reply)
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Post Edited';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+
+                        context.commit('setPostComments', reply.result);
+                        // context.commit('setCurrentUserPost', reply)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async addPostComment(context, payload){
+            try {
+                let result = await sendRequest(`${API}/post/comment`, "POST", payload);
+                let reply = await result.json();
+
+                console.log(reply);
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = 'Error';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'error';
+
+                        sweet(alertMsg);
+                        break;
+                    default:
+                        alertMsg.title = 'Added Comment';
+                        alertMsg.text = reply.msg;
+                        alertMsg.icon = 'success';
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async deletePostComment(context, payload){
+            try {
+                // http://localhost:5000/post/3/comment/2
+                let result = await sendRequest(`${API}/post/${payload.postID}/comment/${payload.commentID}`, "DELETE");
+                let reply = await result.json();
+
+                console.log('some: ', reply)
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async editPostComment(context, payload) {
+            try {
+                // http://localhost:5000/post/3/comment/1
+                let result = await sendRequest(`${API}/post/${payload.postID}/comment/${payload.commentID}`, "PUT", payload);
+                let reply = await result.json();
+
+                console.log(reply)
+            } catch(e) {
+                console.log(e)
             }
         }
     },

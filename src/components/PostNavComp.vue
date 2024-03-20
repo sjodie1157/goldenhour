@@ -12,16 +12,21 @@
             <button class="btn border-2 border-primary bg-secondary rounded-4 mx-1"><i
                     class="bi bi-plus-lg text-secondary"></i></button>
         </div>
-        <div class="input-group my-3">
-            <span class="input-group-text text-secondary" id="basic-addon1"><i class="bi bi-chat-left-text-fill"></i></span>
-            <input class="form-control" type="text" placeholder="What's on your mind?"
-                aria-describedby="basic-addon1" />
-        </div>
+        <button class="app-btn-dark opacity-75 mt-3 mb-2 btn border-0 ms-2" data-bs-target="#postAdd" data-bs-toggle="modal">
+            <i class="bi bi-chat-left-text-fill me-1"></i>
+            Add Post
+        </button>
+        <PostAddModal />
     </div>
 </template>
 <script>
+import PostAddModal from '@/components/PostAddModal.vue';
+
 export default {
-    name: "PostNavComponent"
+    name: "PostNavComponent",
+    components: {
+        PostAddModal
+    }
 }
 </script>
 <style scoped>

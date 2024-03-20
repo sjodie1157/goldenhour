@@ -6,14 +6,7 @@
         username: user.username,
         email: user.email
     }' />
-                <FeedNavComponent v-if="user.role == 'admin'" />
-                <div class="p-3 d-flex justify-content-center">
-                    <button
-                        class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
-                        <span><i class="bi bi-gear-fill ms-1"></i></span>
-                        <small class="mx-2">Settings</small>
-                    </button>
-                </div>
+            <FeedNavComponent v-if="user.role == 'admin'" />
             </div>
             <div class="col-9 bg-white px-3 vh-100 d-flex flex-column">
                 <div class="bg-dark-subtle my-3 p-3 rounded-1 fw-bold fs-5 text-white border border-2 text-center">Admin
@@ -34,8 +27,7 @@
                             </div>
                         </div>
                         <div class="col d-flex align-items-center justify-content-end">
-                            <button
-                                class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
+                            <button class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7" data-bs-target="#userAdd" data-bs-toggle="modal">
                                 <span><i class="bi bi-person-fill-add"></i></span>
                                 <small class="mx-2">Add User</small>
                             </button>
@@ -61,9 +53,7 @@
                                 <td class="align-middle"><small>{{ user.userProfile }}</small></td>
                                 <td class="d-flex flex-column justify-content-center align-items-center">
                                     <button class="btn btn-danger my-1" data-bs-target="#userEdit"
-                                        data-bs-toggle="modal">Manage</button>
-                                    <!-- <button class="btn btn-dark my-1 w-75">Suspend</button> -->
-                                    <!-- <button class="btn btn-dark my-1 w-75">Delete</button> -->
+                                        data-bs-toggle="modal" @click="manageUser(user)">Manage</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -72,38 +62,30 @@
             </div>
         </div>
     </div>
-    <div class="modal modal-xl fade" id="userEdit">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="display-5 text-secondary fs-5 fw-medium text-center m-0">Manage User</h5>
-                    <button type="button" class="btn-close border-0 shadow-none" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <!-- <div class="modal-header">
-                    <div class="modal-title">User Edit</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Modal body text goes here</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div> -->
-            </div>
-        </div>
-    </div>
+    <AdminUserEdit :user='manageUserData'/>
+    <AdminAddUser />
+    <SettingsModal />
 </template>
 <script>
 import FeedNavComponent from '@/components/FeedNavComp.vue';
 import FeedSideNavComp from '@/components/FeedSideNavComp.vue';
+import AdminUserEdit from '@/components/AdminUserEdit.vue';
+import AdminAddUser from '@/components/AdminAddUser.vue';
+import SettingsModal from '@/components/SettingsModal.vue';
 
 export default {
     name: "AdminView",
+    data(){
+        return {
+            manageUserData: {}
+        }
+    },
     components: {
         FeedNavComponent,
-        FeedSideNavComp
+        FeedSideNavComp,
+        AdminUserEdit,
+        AdminAddUser,
+        SettingsModal
     },
     mounted() {
         this.$store.state.display_nav = false;
@@ -129,6 +111,9 @@ export default {
         searchUser() {
             let searchInput = this.$refs.searchInput;
             this.$store.dispatch('adminSearchUser', searchInput.value);
+        },
+        manageUser(user){
+            this.manageUserData = user;
         },
         searchEnter() { },
         searchLeave() { }

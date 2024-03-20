@@ -32,36 +32,48 @@
                 </div>
                 <small class="fw-normal mx-2 mt-4 mb-3">{{ post.comment }}</small>
             </div>
-            <div class="bg-white p-2 d-flex">
-                <button class="btn btn-light text-secondary mx-1">
-                    <span><i class="bi bi-hand-thumbs-up-fill"></i></span> <small>Like</small></button>
-                <button class="btn btn-light text-secondary mx-1">
-                    <span><i class="bi bi-chat-text-fill"></i></span> <small>Comment</small></button>
-                <!-- <button class="btn btn-light text-secondary mx-1">
-                    <span><i class="bi bi-share-fill"></i></span> <small>Share</small></button> -->
+            <div class="bg-white p-2 d-flex align-items-center justify-content-between">
+                <div>
+                    <button class="btn btn-light text-secondary mx-1">
+                        <span><i class="bi bi-hand-thumbs-up-fill"></i></span> <small>Like</small></button>
+                    <button class="btn btn-light text-secondary mx-1" data-bs-target="#commentsModal" data-bs-toggle="modal" @click="getComments">
+                        <span><i class="bi bi-chat-text-fill"></i></span> <small>Comment</small></button>
+                </div>
+                <div v-if="post.lastEditedTime" class="d-flex flex-column px-2 py-1 user-select-none">
+                    <div class="ms-2">
+                        <small class="text-secondary datetime">Last Edited:</small>&nbsp;
+                        <small class="text-secondary datetime">{{ post.lastEditedBy }}</small>
+                    </div>
+                    <small class="datetime ms-2 me-3 text-secondary">{{ post.lastedEditedTime }}</small>
+                </div>
             </div>
         </div>
         <div ref="dropdown" show-dropdown="false"
-            class="app-dropdown position-absolute bg-white top-0 end-0 py-0 rounded-2 w-25 m-5 shadow text-dark border border-secondary-subtle border-2 overflow-hidden">
+            class="app-dropdown clearfix position-absolute bg-white top-0 end-0 py-0 rounded-2 w-25 m-5 shadow text-dark border border-secondary-subtle border-2 overflow-hidden">
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
                     class="bi bi-person-circle me-2"></i><small class="me-2">User Profile</small></button>
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
                     class="bi bi-clipboard me-2"></i><small class="me-2">Copy Link</small></button>
-            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"
-                v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-pencil-square me-2"></i><small
-                    class="me-2">Edit Post</small></button>
-            <button class="btn btn-danger w-100 py-2 my-0 border-0 rounded-0"
-                v-if="user.currentUserPost || user.role == 'admin'"><i class="bi bi-trash me-2"></i><small
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" data-bs-target="#commentsModal" data-bs-toggle="modal" @click="getComments"><i
+                    class="bi bi-chat-text-fill me-2"></i><small class="me-2">Comments</small></button>
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" v-if="user.hasFullOptions"
+                data-bs-target="#postEdit" data-bs-toggle="modal"><i class="bi bi-pencil-square me-2"></i><small
+                    class="me-2" @click="setPost">Edit Post</small></button>
+            <button ref="post" class="btn btn-danger w-100 py-2 my-0 border-0 rounded-0" v-if="user.hasFullOptions"
+                @click="deletePost"><i class="bi bi-trash me-2"></i><small
                     class="me-2">Delete</small></button>
         </div>
     </div>
 </template>
 <script>
+
 export default {
     name: "PostComponent",
     props: {
         user: Object,
         post: Object
+    },
+    components: {
     },
     data() {
         return {}
@@ -79,6 +91,19 @@ export default {
                 elem.style['display'] = 'block';
                 elem.setAttribute('show-dropdown', 'true');
             }
+        },
+        async deletePost() {
+            console.log('postID: ', this.post.postID);
+            await this.$store.dispatch('deletePost', this.post.postID);
+        },
+        async setPost(){
+            await this.$store.dispatch('setCurrentEditPost', this.post)
+        },
+        async getComments(){
+            let data = { ...this.post, ...this.user };
+
+            await this.$store.dispatch('setCurrentEditPost', data);
+            await this.$store.dispatch('getPostComments', this.post.postID)
         }
     }
 }
@@ -111,7 +136,7 @@ export default {
     display: none;
     animation-name: fadeIn;
     animation-duration: 400ms;
-    transform: scale(0%) translate(100%, -100%);
+    transform: translateY(-14%) !important;
     animation-fill-mode: forwards;
 }
 

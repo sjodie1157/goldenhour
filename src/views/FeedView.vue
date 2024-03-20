@@ -7,22 +7,14 @@
                     email: user.email
                 }' />
                 <FeedNavComponent />
-                <div class="p-3 d-flex justify-content-center">
-                    <button
-                        class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7">
-                        <span><i class="bi bi-gear-fill ms-1"></i></span>
-                        <small class="mx-2">Settings</small>
-                    </button>
-                </div>
             </div>
             <div class="col-6 bg-white px-3 vh-100 d-flex flex-column">
                 <PostNavComponent />
-                <div class="posts flex-fill overflow-auto" v-if="posts">
+                <div class="posts flex-fill overflow-auto pb-4" v-if="posts && user">
                     <PostComponent v-for="post in posts" :key="post" :user='{
                         username: post.userName,
                         profile: post.userProfile,
-                        currentUserPost: post.userName == user.username,
-                        role: user.role
+                        hasFullOptions: (post.userID == user.id) || user.role == "admin"
                     }' :post='{
                         image: post.postMedia,
                         comment: post.postComment,
@@ -32,10 +24,13 @@
                     }' />
                 </div>
             </div>
-            <div class="col-3 bg-danger p-0">
-                <i class="bi bi-person-gear text-white fs-1"></i>
+            <div class="col-3 p-3 vh-100 bg-white">
+                <QuickChatComp />
             </div>
         </div>
+        <PostEditModal />
+        <SettingsModal />
+        <CommentModal />
     </div>
 </template>
 <script>
@@ -43,6 +38,10 @@ import PostComponent from '@/components/PostComp.vue';
 import PostNavComponent from '@/components/PostNavComp.vue';
 import FeedNavComponent from '@/components/FeedNavComp.vue';
 import FeedSideNavComp from '@/components/FeedSideNavComp.vue';
+import PostEditModal from '@/components/PostEditModal.vue';
+import SettingsModal from '@/components/SettingsModal.vue';
+import QuickChatComp from '@/components/QuickChatComp.vue';
+import CommentModal from '@/components/CommentModal.vue';
 
 export default {
     name: "FeedView",
@@ -55,20 +54,22 @@ export default {
         PostComponent,
         PostNavComponent,
         FeedNavComponent,
-        FeedSideNavComp
+        FeedSideNavComp,
+        PostEditModal,
+        SettingsModal,
+        QuickChatComp,
+        CommentModal
     },
-    mounted() {
-        this.$store.dispatch('loadUser');
+    async mounted() {
         this.$store.state.display_nav = false;
-        // let token = this.$cookies.get('token');
+        await this.$store.dispatch('loadUser');
+        await this.$store.dispatch('getPosts');
 
-        this.$store.dispatch('getPosts');
-        // if( !token ){
-        //     this.$store.dispatch('redirect', '');
-        // }
-        // get feed, if cannot get feed because autherror then redirect to login page
+        let updater = setInterval(async ()=>{
+            await this.$store.dispatch('updatePosts');
+        }, 10000);
 
-        // console.log(1);
+        console.log(updater);
     },
     computed: {
         user() {
@@ -97,4 +98,8 @@ export default {
     }
 }
 </script>
-<style scoped></style>
+<style scoped>
+.quick-chat {
+    background-color: rgb(151,107,182, 1);
+}
+</style>
