@@ -50,7 +50,7 @@ class User {
         try {
             let user = verifyAToken(token);
 
-            const getUser = `SELECT userID, userName, userEmail, userRole, userAge, userProfile FROM Users WHERE userEmail = ?;`;
+            const getUser = `SELECT userID, userName, userEmail, userRole, userAge, userProfile, accountCreated FROM Users WHERE userEmail = ?;`;
 
             db.query(getUser, [user.email], (err, result)=>{
                 if(err) {
@@ -82,8 +82,8 @@ class User {
                 })
             })
         } catch(e) {
-            console.log(e)
             handleAuthError(e, req, res);
+            return;
         }
     }
     async fetchUser(req, res) {
@@ -148,7 +148,7 @@ class User {
                     msg: "This is not allowed"
                 })
             } else {
-                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile FROM Users;`;
+                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile, accountCreated FROM Users;`;
 
                 db.query(getUsers, (err, result)=>{
                     if(err) throw err;
@@ -262,6 +262,14 @@ class User {
         let _userID = +req.params.userID;
         let token = req.headers['authorization'];
 
+        if( _userID == 1 ){
+            res.status(code.FORBIDDEN).send({
+                status: code.FORBIDDEN,
+                msg: "Cannot update the app account"
+            })
+            return;
+        }
+
         if( !token ){
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
@@ -273,34 +281,54 @@ class User {
 
         try {
             let user = verifyAToken(token);
-            const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userEmail = ?;`;
 
-            let result = await dbAsync(getUserID, [user.email]);
+            let result;
+
+            if( user.role != 'admin' ) {
+                const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userEmail = ?;`;
+    
+                result = await dbAsync(getUserID, [user.email]);
+                console.log(result)
+            } else {
+                const getUser = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userID = ?;`;
+    
+                result = await dbAsync(getUser, [_userID]);
+                console.log(result)
+            }
+            if( result && result.length <= 0){
+                res.status(code.NOTFOUND).send({
+                    status: code.NOTFOUND,
+                    msg: "User not found"
+                })
+                return;
+            }
             const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
-
-            if( data.password ) data.password = await hash(data.password, ROUNDS);
+            if( data.userPass ) data.userPass = await hash(data.userPass, ROUNDS);
             
-            if( _userID == userID ){
+            if( _userID == userID || user.role == 'admin' ){
                 let tokenPayload = {
-                    username: (data.username) ? (data.username) : userName,
+                    username: (data.userName) ? (data.userName) : userName,
                     email: userEmail,
-                    age: (data.age) ? (data.age) : userAge,
-                    role: (user.role == 'admin') ? data.role : userRole
+                    age: (data.userAge) ? (data.userAge) : userAge,
+                    role: (user.role == 'admin') ? data.userRole : userRole
                 }
                 let dbPayload = {
                     userEmail: userEmail,
-                    userName: (data.username) ? data.username : userName, 
-                    userPass: (data.password) ? data.password : userPass, 
-                    userAge: (data.age) ? data.age : userAge,
-                    userRole: (user.role == 'admin') ? data.role : userRole,
-                    userProfile: (data.profile) ? data.profile : userProfile
+                    userName: (data.userName) ? data.userName : userName,
+                    userPass: (data.userPass) ? data.userPass : userPass,
+                    userAge: (data.userAge) ? data.userAge : userAge,
+                    userRole: (user.role == 'admin') ? data.userRole : userRole,
+                    userProfile: (data.userProfile) ? data.userProfile : userProfile
                 }
 
                 let new_token = createToken(tokenPayload, '7d');
 
                 const updateUserAccount = `UPDATE Users SET ? WHERE userID = ?`;
                 db.query(updateUserAccount, [dbPayload, _userID], (err, result)=>{
-                    if(err) throw err
+                    if(err) {
+                        DatabaseErrorHandling(err, req, res);
+                        return;
+                    }
                     res.status(code.OK).send({
                         status: code.OK,
                         msg: "Account updated successfully",
@@ -325,13 +353,14 @@ class User {
         let _userID = req.params.userID;
         let data = req.body;
 
-        if( !data.password ) {
-            res.status(code.UNAUTHORIZED).send({
-                status: code.UNAUTHORIZED,
-                msg: "Please provide password"
+        if( _userID == 1 ){
+            res.status(code.FORBIDDEN).send({
+                status: code.FORBIDDEN,
+                msg: "Cannot delete the main Account"
             })
+            return
         }
-        
+
         if (!token) {
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
@@ -345,15 +374,16 @@ class User {
         try {
             let user = verifyAToken(token);
 
-            if(user.email == 'capstonebud@gmail.com'){
-                res.status(code.FORBIDDEN).send({
-                    status: code.FORBIDDEN,
-                    msg: "Imagine you delete this account, this app will crash."
+            console.log(user)
+            if( !data.password && user.role != 'admin' ) {
+                res.status(code.UNAUTHORIZED).send({
+                    status: code.UNAUTHORIZED,
+                    msg: "Please provide password"
                 })
                 return;
             }
 
-            const getUserPassword = `SELECT userID, userName, userEmail, userAge, userPass, userProfile FROM Users WHERE userEmail = ?;`;
+            const getUserPassword = `SELECT userID, userName, userEmail, userRole, userAge, userPass, userProfile FROM Users WHERE userEmail = ?;`;
             let result = await dbAsync(getUserPassword, [user.email]);
 
             if( result.length < 1 ) {
@@ -363,17 +393,28 @@ class User {
                 })
                 return;
             }
-            const { userID, userPass } = result[0];
+            const { userID, userPass, userRole } = result[0];
 
-            if( _userID == userID ){
-                let correctPass = compare(data.password, userPass);
+            if(user.email == 'capstonebud@gmail.com' && userID == _userID ){
+                res.status(code.FORBIDDEN).send({
+                    status: code.FORBIDDEN,
+                    msg: "Imagine you delete this account, this app will crash."
+                })
+                return;
+            }
+
+            if( _userID == userID || userRole == 'admin' ){
+                let correctPass = (userRole == 'admin') ? true : compare(data.password, userPass);
 
                 if( correctPass ){
                     const deleteUserAccount = `DELETE FROM Users WHERE userID = ?;`;
 
-                    db.query(deleteUserAccount, [userID], (err, result)=>{
-                        if(err);
-                        
+                    db.query(deleteUserAccount, [_userID], (err, result)=>{
+                        if(err) {
+                            DatabaseErrorHandling(err, req, res);
+                            return;
+                        }
+
                         res.status(code.OK).send({
                             status: code.OK,
                             msg: "Account deleted."
@@ -389,7 +430,7 @@ class User {
             } else {
                 res.status(code.UNAUTHORIZED).send({
                     status: code.UNAUTHORIZED,
-                    msg: "Invalid account to update"
+                    msg: "Invalid account to delete"
                 })
             }
         } catch(e) {
