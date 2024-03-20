@@ -262,6 +262,14 @@ class User {
         let _userID = +req.params.userID;
         let token = req.headers['authorization'];
 
+        if( _userID == 1 ){
+            res.status(code.FORBIDDEN).send({
+                status: code.FORBIDDEN,
+                msg: "Cannot update the app account"
+            })
+            return;
+        }
+
         if( !token ){
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
@@ -274,36 +282,43 @@ class User {
         try {
             let user = verifyAToken(token);
 
+            let result;
+
             if( user.role != 'admin' ) {
                 const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userEmail = ?;`;
     
-                let result = await dbAsync(getUserID, [user.email]);
-                const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
+                result = await dbAsync(getUserID, [user.email]);
                 console.log(result)
             } else {
                 const getUser = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userID = ?;`;
     
-                let result = await dbAsync(getUser, [_userID]);
-                const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
+                result = await dbAsync(getUser, [_userID]);
                 console.log(result)
             }
-
-            if( data.password ) data.password = await hash(data.password, ROUNDS);
+            if( result && result.length <= 0){
+                res.status(code.NOTFOUND).send({
+                    status: code.NOTFOUND,
+                    msg: "User not found"
+                })
+                return;
+            }
+            const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
+            if( data.userPass ) data.userPass = await hash(data.userPass, ROUNDS);
             
             if( _userID == userID || user.role == 'admin' ){
                 let tokenPayload = {
-                    username: (data.username) ? (data.username) : userName,
+                    username: (data.userName) ? (data.userName) : userName,
                     email: userEmail,
-                    age: (data.age) ? (data.age) : userAge,
-                    role: (user.role == 'admin') ? data.role : userRole
+                    age: (data.userAge) ? (data.userAge) : userAge,
+                    role: (user.role == 'admin') ? data.userRole : userRole
                 }
                 let dbPayload = {
                     userEmail: userEmail,
-                    userName: (data.username) ? data.username : userName, 
-                    userPass: (data.password) ? data.password : userPass, 
-                    userAge: (data.age) ? data.age : userAge,
-                    userRole: (user.role == 'admin') ? data.role : userRole,
-                    userProfile: (data.profile) ? data.profile : userProfile
+                    userName: (data.userName) ? data.userName : userName,
+                    userPass: (data.userPass) ? data.userPass : userPass,
+                    userAge: (data.userAge) ? data.userAge : userAge,
+                    userRole: (user.role == 'admin') ? data.userRole : userRole,
+                    userProfile: (data.userProfile) ? data.userProfile : userProfile
                 }
 
                 let new_token = createToken(tokenPayload, '7d');
@@ -337,6 +352,14 @@ class User {
         let token = req.headers['authorization'];
         let _userID = req.params.userID;
         let data = req.body;
+
+        if( _userID == 1 ){
+            res.status(code.FORBIDDEN).send({
+                status: code.FORBIDDEN,
+                msg: "Cannot delete the main Account"
+            })
+            return
+        }
 
         if( !data.password ) {
             res.status(code.UNAUTHORIZED).send({
