@@ -68,9 +68,9 @@ export default createStore({
         setCurrentEditPost(context, payload){
             context.commit('setEditPost', payload);
         },
-        logoutUser(){
+        logoutUser(context){
             cookies.remove('authToken');
-
+            context.commit('setNavDisplay', true)
             this.dispatch('redirect', '')
         },
         async loadUser(context){
@@ -79,14 +79,13 @@ export default createStore({
             let result = await sendRequest(`${API}/user/profile/me`, "GET");
             let reply = await result.json();
 
-            
             console.log(reply)
 
             switch( true ){
                 case reply.status >= 400:
-                    this.display_nav = true;
+                    context.commit('setNavDisplay', true)
                     cookies.remove('authToken');
-                    // this.dispatch('redirect', '');
+                    this.dispatch('redirect', '');
                     break;
                 default:
                     break
@@ -160,7 +159,7 @@ export default createStore({
                 let alertMsg = {
                     title: null,
                     text: null,
-                    icon: null,
+                    icon: null
                 }
                 console.log(reply)
                 switch( true ){
@@ -236,6 +235,36 @@ export default createStore({
                 sweet(alertMsg);
             }
         },
+        async adminUpdateUser(context, payload){
+            try {
+                console.log("payload", payload)
+                let result = await sendRequest(`${API}/user/${payload.userID}`, "PATCH", payload)
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null,
+                }
+
+                switch(true){
+                    case reply.status >= 400:
+                        alertMsg.title = "Error"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = "error"
+                        sweet(alertMsg)
+                        break;
+                    default:
+                        alertMsg.title = "Account Updated"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = "success"
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
         async updateUser(context, payload){
             try {
                 console.log('payload: ', payload);
@@ -245,7 +274,8 @@ export default createStore({
                 let alertMsg = {
                     title: null,
                     text: null,
-                    icon: null
+                    icon: null,
+                    timer: 5000
                 }
 
                 let {new_token} = reply;

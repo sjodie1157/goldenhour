@@ -135,7 +135,7 @@ export default {
         deleteUserAccount(){},
         async saveChanges(){
             console.log('currentUser: ', this.currentUser)
-            await this.$store.dispatch('updateUser', this.currentUser);
+            await this.$store.dispatch('adminUpdateUser', this.currentUser);
             await this.$store.dispatch('adminGetUsers');
         }
     },
