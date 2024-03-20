@@ -361,13 +361,6 @@ class User {
             return
         }
 
-        if( !data.password ) {
-            res.status(code.UNAUTHORIZED).send({
-                status: code.UNAUTHORIZED,
-                msg: "Please provide password"
-            })
-        }
-        
         if (!token) {
             res.status(code.UNAUTHORIZED).send({
                 status: code.UNAUTHORIZED,
@@ -381,15 +374,16 @@ class User {
         try {
             let user = verifyAToken(token);
 
-            if(user.email == 'capstonebud@gmail.com'){
-                res.status(code.FORBIDDEN).send({
-                    status: code.FORBIDDEN,
-                    msg: "Imagine you delete this account, this app will crash."
+            console.log(user)
+            if( !data.password && user.role != 'admin' ) {
+                res.status(code.UNAUTHORIZED).send({
+                    status: code.UNAUTHORIZED,
+                    msg: "Please provide password"
                 })
                 return;
             }
 
-            const getUserPassword = `SELECT userID, userName, userEmail, userAge, userPass, userProfile FROM Users WHERE userEmail = ?;`;
+            const getUserPassword = `SELECT userID, userName, userEmail, userRole, userAge, userPass, userProfile FROM Users WHERE userEmail = ?;`;
             let result = await dbAsync(getUserPassword, [user.email]);
 
             if( result.length < 1 ) {
@@ -399,17 +393,28 @@ class User {
                 })
                 return;
             }
-            const { userID, userPass } = result[0];
+            const { userID, userPass, userRole } = result[0];
 
-            if( _userID == userID ){
-                let correctPass = compare(data.password, userPass);
+            if(user.email == 'capstonebud@gmail.com' && userID == _userID ){
+                res.status(code.FORBIDDEN).send({
+                    status: code.FORBIDDEN,
+                    msg: "Imagine you delete this account, this app will crash."
+                })
+                return;
+            }
+
+            if( _userID == userID || userRole == 'admin' ){
+                let correctPass = (userRole == 'admin') ? true : compare(data.password, userPass);
 
                 if( correctPass ){
                     const deleteUserAccount = `DELETE FROM Users WHERE userID = ?;`;
 
-                    db.query(deleteUserAccount, [userID], (err, result)=>{
-                        if(err);
-                        
+                    db.query(deleteUserAccount, [_userID], (err, result)=>{
+                        if(err) {
+                            DatabaseErrorHandling(err, req, res);
+                            return;
+                        }
+
                         res.status(code.OK).send({
                             status: code.OK,
                             msg: "Account deleted."
@@ -425,7 +430,7 @@ class User {
             } else {
                 res.status(code.UNAUTHORIZED).send({
                     status: code.UNAUTHORIZED,
-                    msg: "Invalid account to update"
+                    msg: "Invalid account to delete"
                 })
             }
         } catch(e) {
