@@ -3,6 +3,14 @@ import jwt from 'jsonwebtoken';
 
 const { JsonWebTokenError, TokenExpiredError } = jwt;
 
+function DatabaseErrorHandling(err, req, res){
+    console.log("DatabaseErrorHandling: ", err);
+}
+
+function ServerErrorHandling(err, req, res, next){
+    console.log("ServerErrorHandling: ", err)
+}
+
 function handleRequestError(err, req, res, next){
     if( err ){
         console.log(err)
@@ -38,5 +46,7 @@ function handleAuthError(err, req, res){
 
 export {
     handleRequestError,
-    handleAuthError
+    handleAuthError,
+    ServerErrorHandling,
+    DatabaseErrorHandling
 }
