@@ -46,12 +46,14 @@
                                     <td class="px-4">
                                         <div class="dropdown align-items-center">
                                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                                data-bs-toggle="dropdown" aria-expanded="false">
                                                 {{ user.userRole }}
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><button class="dropdown-item" @click="changeUserRole('admin')">Admin</button></li>
-                                                <li><button class="dropdown-item" @click="changeUserRole('user')">User</button></li>
+                                                <li><button class="dropdown-item"
+                                                        @click="changeUserRole('admin')">Admin</button></li>
+                                                <li><button class="dropdown-item"
+                                                        @click="changeUserRole('user')">User</button></li>
                                             </ul>
                                         </div>
                                     </td>
@@ -69,12 +71,14 @@
                                     <td class="px-4">
                                         <div class="dropdown align-items-center">
                                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                                data-bs-toggle="dropdown" aria-expanded="false">
                                                 {{ user.userRole }}
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><button class="dropdown-item" @click="changeUserRole('admin')">Activated</button></li>
-                                                <li><button class="dropdown-item" @click="changeUserRole('user')">Deactivated</button></li>
+                                                <li><button class="dropdown-item"
+                                                        @click="changeUserRole('admin')">Activated</button></li>
+                                                <li><button class="dropdown-item"
+                                                        @click="changeUserRole('user')">Deactivated</button></li>
                                             </ul>
                                         </div>
                                     </td>
@@ -100,6 +104,8 @@
                                 <i class="bi bi-save me-1"></i>Save Changes</button>
                             <button class="btn btn-primary mx-2 pe-3">
                                 <i class="bi bi-envelope-fill me-1"></i>Mail User</button>
+                            <button class="btn btn-danger mx-2 pe-3">
+                                <i class="bi bi-envelope-fill me-1"></i>Delete User</button>
                         </div>
                     </div>
                 </div>
@@ -121,11 +127,11 @@ export default {
     mounted() {
     },
     methods: {
-        changeUserRole(){
+        changeUserRole() {
             let user_update = this.user;
             console.log(user_update)
         },
-        saveChanges(){}
+        saveChanges() { }
     }
 }
 </script>

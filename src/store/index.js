@@ -79,6 +79,16 @@ export default createStore({
             let result = await sendRequest(`${API}/user/profile/me`, "GET");
             let reply = await result.json();
 
+            console.log(reply)
+
+            switch( true ){
+                case reply.status >= 400:
+                    this.store.dispatch('redirect', '')
+                    return;
+                default:
+                    break
+            }
+
             user = reply.result;
 
             console.log('user profile: ',user)
