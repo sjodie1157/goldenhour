@@ -79,12 +79,15 @@ export default createStore({
             let result = await sendRequest(`${API}/user/profile/me`, "GET");
             let reply = await result.json();
 
+            
             console.log(reply)
 
             switch( true ){
                 case reply.status >= 400:
-                    this.store.dispatch('redirect', '')
-                    return;
+                    this.display_nav = true;
+                    cookies.remove('authToken');
+                    // this.dispatch('redirect', '');
+                    break;
                 default:
                     break
             }
@@ -236,7 +239,7 @@ export default createStore({
         async updateUser(context, payload){
             try {
                 console.log('payload: ', payload);
-                let result = await sendRequest(`${API}/user/${payload.id}`, "PATCH", payload);
+                let result = await sendRequest(`${API}/user/${payload.userID}`, "PATCH", payload);
                 let reply = await result.json();
 
                 let alertMsg = {

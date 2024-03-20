@@ -11,7 +11,7 @@
                             aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="row g-0 pt-5" v-if="user">
+                <div class="row g-0 pt-5" v-if="currentUser">
                     <div class="col-6 d-flex justify-content-center">
                         <div>
                             <div class="bg-secondary p-5 rounded-3 position-relative">
@@ -31,15 +31,15 @@
                             <tbody>
                                 <tr class="py-3">
                                     <td><span>User ID: </span></td>
-                                    <td class="px-4"><span>{{ user.userID }}</span></td>
+                                    <td class="px-4"><span>{{ currentUser.userID }}</span></td>
                                 </tr>
                                 <tr class="py-3">
                                     <td><span>User Name: </span></td>
-                                    <td class="px-4"><span>{{ user.userName }}</span></td>
+                                    <td class="px-4"><span>{{ currentUser.userName }}</span></td>
                                 </tr>
                                 <tr>
                                     <td><span>User Email: </span></td>
-                                    <td class="px-4"><span>{{ user.userEmail }}</span></td>
+                                    <td class="px-4"><span>{{ currentUser.userEmail }}</span></td>
                                 </tr>
                                 <tr class="py-3">
                                     <td class="align-middle"><span>User Role: </span></td>
@@ -47,7 +47,7 @@
                                         <div class="dropdown align-items-center">
                                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
                                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ user.userRole }}
+                                                {{ currentUser.userRole }}
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><button class="dropdown-item"
@@ -64,7 +64,7 @@
                                 </tr>
                                 <tr class="py-3">
                                     <td><span>Account Created: </span></td>
-                                    <td class="px-4"><span>{{ user.accountCreated }}</span></td>
+                                    <td class="px-4"><span>{{ currentUser.accountCreated }}</span></td>
                                 </tr>
                                 <tr class="py-3">
                                     <td class="align-middle"><span>Account Status: </span></td>
@@ -87,7 +87,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="row g-0 pb-5" v-if="user">
+                <div class="row g-0 pb-5" v-if="currentUser">
                     <div class="col-6 d-flex justify-content-center">
                         <div>
                             <div class="d-flex justify-content-center">
@@ -128,16 +128,19 @@ export default {
     },
     methods: {
         changeUserRole(userRole){
-            this.user.userRole = userRole;
+            console.log(this.currentUser)
+            this.currentUser.userRole = userRole;
         },
         changeUserAccountState(){},
         deleteUserAccount(){},
         async saveChanges(){
-            // await this.$store.dispatch('');
+            console.log('currentUser: ', this.currentUser)
+            await this.$store.dispatch('updateUser', this.currentUser);
+            await this.$store.dispatch('adminGetUsers');
         }
     },
     computed: {
-        user(){
+        currentUser(){
             let users = this.$store.state.users;
             if( users ){
                 return users.filter( (user)=>{
