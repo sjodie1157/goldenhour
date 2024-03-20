@@ -62,7 +62,7 @@
             </div>
         </div>
     </div>
-    <AdminUserEdit :user='manageUserData'/>
+    <AdminUserEdit :userID='userID'/>
     <AdminAddUser />
     <SettingsModal />
 </template>
@@ -77,7 +77,7 @@ export default {
     name: "AdminView",
     data(){
         return {
-            manageUserData: {}
+            userID: null
         }
     },
     components: {
@@ -113,7 +113,7 @@ export default {
             this.$store.dispatch('adminSearchUser', searchInput.value);
         },
         manageUser(user){
-            this.manageUserData = user;
+            this.userID = user.userID;
         },
         searchEnter() { },
         searchLeave() { }

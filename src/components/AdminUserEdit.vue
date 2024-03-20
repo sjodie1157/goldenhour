@@ -11,7 +11,7 @@
                             aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="row g-0 pt-5">
+                <div class="row g-0 pt-5" v-if="user">
                     <div class="col-6 d-flex justify-content-center">
                         <div>
                             <div class="bg-secondary p-5 rounded-3 position-relative">
@@ -64,7 +64,7 @@
                                 </tr>
                                 <tr class="py-3">
                                     <td><span>Account Created: </span></td>
-                                    <td class="px-4"><span>{{ user.userName }}</span></td>
+                                    <td class="px-4"><span>{{ user.accountCreated }}</span></td>
                                 </tr>
                                 <tr class="py-3">
                                     <td class="align-middle"><span>Account Status: </span></td>
@@ -72,13 +72,13 @@
                                         <div class="dropdown align-items-center">
                                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
                                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ user.userRole }}
+                                                Activated
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><button class="dropdown-item"
-                                                        @click="changeUserRole('admin')">Activated</button></li>
+                                                        @click="changeUserAccountState('Activated')">Activated</button></li>
                                                 <li><button class="dropdown-item"
-                                                        @click="changeUserRole('user')">Deactivated</button></li>
+                                                        @click="changeUserAccountState('Deactivated')">Deactivated</button></li>
                                             </ul>
                                         </div>
                                     </td>
@@ -87,7 +87,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="row g-0 pb-5">
+                <div class="row g-0 pb-5" v-if="user">
                     <div class="col-6 d-flex justify-content-center">
                         <div>
                             <div class="d-flex justify-content-center">
@@ -100,12 +100,12 @@
                     </div>
                     <div class="col-6 d-flex justify-content-center align-items-center flex-column">
                         <div class="d-flex justify-content-evenly">
-                            <button class="btn btn-secondary mx-2 pe-3">
+                            <button class="btn btn-secondary mx-2 pe-3" @click="saveChanges">
                                 <i class="bi bi-save me-1"></i>Save Changes</button>
                             <button class="btn btn-primary mx-2 pe-3">
                                 <i class="bi bi-envelope-fill me-1"></i>Mail User</button>
-                            <button class="btn btn-danger mx-2 pe-3">
-                                <i class="bi bi-envelope-fill me-1"></i>Delete User</button>
+                            <button class="btn btn-danger mx-2 pe-3" @click="deleteUserAccount">
+                                <i class="bi bi-trash-fill me-1"></i>Delete User</button>
                         </div>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
 export default {
     name: "AdminUserEdit",
     props: {
-        user: Object
+        userID: Number
     },
     data() {
         return {
@@ -127,11 +127,26 @@ export default {
     mounted() {
     },
     methods: {
-        changeUserRole() {
-            let user_update = this.user;
-            console.log(user_update)
+        changeUserRole(userRole){
+            this.user.userRole = userRole;
         },
-        saveChanges() { }
+        changeUserAccountState(){},
+        deleteUserAccount(){},
+        async saveChanges(){
+            // await this.$store.dispatch('');
+        }
+    },
+    computed: {
+        user(){
+            let users = this.$store.state.users;
+            if( users ){
+                return users.filter( (user)=>{
+                    return user.userID == this.userID
+                } )[0]
+            } else {
+                return null;
+            }
+        }
     }
 }
 </script>
