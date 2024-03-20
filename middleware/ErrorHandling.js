@@ -5,6 +5,20 @@ const { JsonWebTokenError, TokenExpiredError } = jwt;
 
 function DatabaseErrorHandling(err, req, res){
     console.log("DatabaseErrorHandling: ", err);
+    switch( true ){
+        case (err.code == 1054):
+            res.status(code.BADREQUEST).send({
+                status: code.BADREQUEST,
+                msg: "Make sure the data you provided is correct"
+            })
+            break;
+        default:
+            res.status(code.INTERNALSERVERERROR).send({
+                status: code.INTERNALSERVERERROR,
+                msg: "Internal Server Error"
+            })
+            break;
+    }
 }
 
 function ServerErrorHandling(err, req, res, next){

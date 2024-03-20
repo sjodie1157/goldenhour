@@ -82,8 +82,8 @@ class User {
                 })
             })
         } catch(e) {
-            console.log(e)
             handleAuthError(e, req, res);
+            return;
         }
     }
     async fetchUser(req, res) {
@@ -273,14 +273,24 @@ class User {
 
         try {
             let user = verifyAToken(token);
-            const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userEmail = ?;`;
 
-            let result = await dbAsync(getUserID, [user.email]);
-            const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
+            if( user.role != 'admin' ) {
+                const getUserID = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userEmail = ?;`;
+    
+                let result = await dbAsync(getUserID, [user.email]);
+                const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
+                console.log(result)
+            } else {
+                const getUser = `SELECT userID, userEmail, userName, userPass, userAge, userRole, userProfile FROM Users WHERE userID = ?;`;
+    
+                let result = await dbAsync(getUser, [_userID]);
+                const { userID, userEmail, userName, userPass, userAge, userRole, userProfile } = result[0];
+                console.log(result)
+            }
 
             if( data.password ) data.password = await hash(data.password, ROUNDS);
             
-            if( _userID == userID ){
+            if( _userID == userID || user.role == 'admin' ){
                 let tokenPayload = {
                     username: (data.username) ? (data.username) : userName,
                     email: userEmail,
@@ -300,7 +310,10 @@ class User {
 
                 const updateUserAccount = `UPDATE Users SET ? WHERE userID = ?`;
                 db.query(updateUserAccount, [dbPayload, _userID], (err, result)=>{
-                    if(err) throw err
+                    if(err) {
+                        DatabaseErrorHandling(err, req, res);
+                        return;
+                    }
                     res.status(code.OK).send({
                         status: code.OK,
                         msg: "Account updated successfully",
