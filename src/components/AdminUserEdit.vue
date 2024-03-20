@@ -132,7 +132,9 @@ export default {
             this.currentUser.userRole = userRole;
         },
         changeUserAccountState(){},
-        deleteUserAccount(){},
+        async deleteUserAccount(){
+            await this.$store.dispatch('deleteUserAccount', this.currentUser);
+        },
         async saveChanges(){
             console.log('currentUser: ', this.currentUser)
             await this.$store.dispatch('adminUpdateUser', this.currentUser);

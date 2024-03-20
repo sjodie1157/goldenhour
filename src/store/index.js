@@ -235,6 +235,34 @@ export default createStore({
                 sweet(alertMsg);
             }
         },
+        async deleteUserAccount(context, payload){
+            try {
+                let result = await sendRequest(`${API}/user/${payload.userID}`, "DELETE");
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = "Error"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = 'error'
+                        break;
+                    default:
+                        alertMsg.title = "Account Deleted"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = 'success'
+                        break;
+                }
+                sweet(alertMsg)
+            } catch(e) {
+                console.log(e)
+            }
+        },
         async adminUpdateUser(context, payload){
             try {
                 console.log("payload", payload)
