@@ -5,7 +5,7 @@
                 <div class="row g-0">
                     <div class="col d-flex justify-content-between align-items-center">
                         <h4 class="display-4 fs-4">Account Settings</h4>
-                        <button class="btn-close border-0 shadow-none" data-bs-dismiss="modal"></button>
+                        <button ref="logoutModal" class="btn-close border-0 shadow-none" data-bs-dismiss="modal"></button>
                     </div>
                 </div>
                 <div class="d-flex justify-content-center align-items-center flex-column">
@@ -74,6 +74,8 @@ export default {
     },
     methods: {
         logout() {
+            let modal = this.$refs.logoutModal;
+            modal.click();
             this.$store.dispatch('logoutUser');
         },
         browseFile(event) {

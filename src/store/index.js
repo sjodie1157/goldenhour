@@ -68,9 +68,9 @@ export default createStore({
         setCurrentEditPost(context, payload){
             context.commit('setEditPost', payload);
         },
-        logoutUser(){
+        logoutUser(context){
             cookies.remove('authToken');
-
+            context.commit('setNavDisplay', true)
             this.dispatch('redirect', '')
         },
         async loadUser(context){
@@ -83,8 +83,10 @@ export default createStore({
 
             switch( true ){
                 case reply.status >= 400:
-                    this.store.dispatch('redirect', '')
-                    return;
+                    context.commit('setNavDisplay', true)
+                    cookies.remove('authToken');
+                    this.dispatch('redirect', '');
+                    break;
                 default:
                     break
             }
@@ -157,7 +159,7 @@ export default createStore({
                 let alertMsg = {
                     title: null,
                     text: null,
-                    icon: null,
+                    icon: null
                 }
                 console.log(reply)
                 switch( true ){
@@ -233,16 +235,75 @@ export default createStore({
                 sweet(alertMsg);
             }
         },
-        async updateUser(context, payload){
+        async deleteUserAccount(context, payload){
             try {
-                console.log('payload: ', payload);
-                let result = await sendRequest(`${API}/user/${payload.id}`, "PATCH", payload);
+                let result = await sendRequest(`${API}/user/${payload.userID}`, "DELETE");
                 let reply = await result.json();
 
                 let alertMsg = {
                     title: null,
                     text: null,
                     icon: null
+                }
+
+                switch( true ){
+                    case reply.status >= 400:
+                        alertMsg.title = "Error"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = 'error'
+                        break;
+                    default:
+                        alertMsg.title = "Account Deleted"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = 'success'
+                        break;
+                }
+                sweet(alertMsg)
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async adminUpdateUser(context, payload){
+            try {
+                console.log("payload", payload)
+                let result = await sendRequest(`${API}/user/${payload.userID}`, "PATCH", payload)
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null,
+                }
+
+                switch(true){
+                    case reply.status >= 400:
+                        alertMsg.title = "Error"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = "error"
+                        sweet(alertMsg)
+                        break;
+                    default:
+                        alertMsg.title = "Account Updated"
+                        alertMsg.text = reply.msg
+                        alertMsg.icon = "success"
+                        sweet(alertMsg)
+                        break;
+                }
+            } catch(e) {
+                console.log(e)
+            }
+        },
+        async updateUser(context, payload){
+            try {
+                console.log('payload: ', payload);
+                let result = await sendRequest(`${API}/user/${payload.userID}`, "PATCH", payload);
+                let reply = await result.json();
+
+                let alertMsg = {
+                    title: null,
+                    text: null,
+                    icon: null,
+                    timer: 5000
                 }
 
                 let {new_token} = reply;

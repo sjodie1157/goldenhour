@@ -45,6 +45,7 @@ export default {
     methods: {
         alertConcern(){
             let msg = cookies.get('alertMsg');
+            console.log(msg)
             if( msg ){
                 this.$store.dispatch('sweetAlert', msg );
             }
