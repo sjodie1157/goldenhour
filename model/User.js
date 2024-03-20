@@ -50,7 +50,7 @@ class User {
         try {
             let user = verifyAToken(token);
 
-            const getUser = `SELECT userID, userName, userEmail, userRole, userAge, userProfile FROM Users WHERE userEmail = ?;`;
+            const getUser = `SELECT userID, userName, userEmail, userRole, userAge, userProfile, accountCreated FROM Users WHERE userEmail = ?;`;
 
             db.query(getUser, [user.email], (err, result)=>{
                 if(err) {
@@ -148,7 +148,7 @@ class User {
                     msg: "This is not allowed"
                 })
             } else {
-                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile FROM Users;`;
+                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile, accountCreated FROM Users;`;
 
                 db.query(getUsers, (err, result)=>{
                     if(err) throw err;
