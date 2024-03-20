@@ -9,6 +9,7 @@ import {
 } from './controller/UserController.js';
 import { postRouter, postsRouter } from './controller/PostsController.js';
 import {
+    ServerErrorHandling,
     handleRequestError
 } from './middleware/ErrorHandling.js';
 import { user } from './model/index.js';
@@ -68,5 +69,6 @@ app.use('/post', postRouter);
 app.use('/posts', postsRouter);
 
 app.use(handleRequestError);
+app.use(ServerErrorHandling);
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

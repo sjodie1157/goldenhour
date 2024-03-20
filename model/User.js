@@ -21,7 +21,8 @@ import {
 } from 'dotenv';
 import util from 'util';
 import {
-    handleAuthError
+    handleAuthError,
+    DatabaseErrorHandling
 } from '../middleware/ErrorHandling.js';
 
 config();
@@ -52,7 +53,17 @@ class User {
             const getUser = `SELECT userID, userName, userEmail, userRole, userAge, userProfile FROM Users WHERE userEmail = ?;`;
 
             db.query(getUser, [user.email], (err, result)=>{
-                if(err) throw err
+                if(err) {
+                    DatabaseErrorHandling(err, req, res);
+                    return;
+                };
+                if( result.length <= 0 ){
+                    res.status(code.UNAUTHORIZED).send({
+                        status: code.UNAUTHORIZED,
+                        msg: "User Account does not exist"
+                    })
+                    return;
+                }
 
                 let {userID, userName, userEmail, userRole, userAge, userProfile} = result[0];
 
@@ -219,7 +230,8 @@ class User {
                 userEmail: user.userEmail,
                 userPass: user.userPass.toString(),
                 userAge: user.userAge,
-                userRole: user.userRole
+                userRole: user.userRole,
+                accountCreated: (new Date()).toISOString().slice(0, 19).replace('T', " ")
             }
 
 
@@ -235,10 +247,6 @@ class User {
                 //     token
                 // })
                 res.send(`account has been verified. You will be redirected shortly to log into your account`);
-
-                setTimeout(()=>{
-                    window.location.href = 'https://capstonebud.web.app'
-                },5000)
 
             })
             // return a session token
