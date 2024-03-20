@@ -18,13 +18,14 @@ async function sendRequest(url, method, data=null, headers=null) {
             "Authorization": "Bearer " + authToken
         }
     }
+    console.log(requestParams)
 
     if( headers ) requestParams.headers = headers;
     if( authToken ) requestParams.headers['Authorization'] = "Bearer " + authToken;
     if( data ) requestParams['body'] = ( requestParams.headers['Content-Type'] == 'application/json' ) ? JSON.stringify(data) : data;
     
     let result = await fetch(url, requestParams);
-    console.log('result0')
+    // console.log('result0: ')
     return result;
 }
 

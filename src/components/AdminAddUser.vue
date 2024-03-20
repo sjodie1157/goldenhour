@@ -29,56 +29,47 @@
                             <thead>
                             </thead>
                             <tbody>
-                                <!-- <tr class="py-3">
-                                    <td><span>User ID: </span></td>
-                                    <td class="px-4"><span>{{ user.userID }}</span></td>
+                                <tr class="py-3">
+                                    <td class="align-middle"><span>Username: </span></td>
+                                    <td class="px-4">
+                                        <span>
+                                            <input v-model="userData.username" class="form-control" type="text" placeholder="username">
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr class="py-3">
-                                    <td><span>User Name: </span></td>
-                                    <td class="px-4"><span>{{ user.userName }}</span></td>
+                                    <td class="align-middle"><span>User Email: </span></td>
+                                    <td class="px-4">
+                                        <span>
+                                            <input v-model="userData.email" class="form-control" type="text" placeholder="email">
+                                        </span>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td><span>User Email: </span></td>
-                                    <td class="px-4"><span>{{ user.userEmail }}</span></td>
+                                <tr class="py-3">
+                                    <td class="align-middle"><span>User Password: </span></td>
+                                    <td class="px-4">
+                                        <span>
+                                            <input v-model="userData.password" class="form-control" type="text" placeholder="password">
+                                        </span>
+                                    </td>
                                 </tr>
                                 <tr class="py-3">
                                     <td class="align-middle"><span>User Role: </span></td>
                                     <td class="px-4">
                                         <div class="dropdown align-items-center">
                                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ user.userRole }}
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                {{ userData.role }}
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><button class="dropdown-item" @click="changeUserRole('admin')">Admin</button></li>
-                                                <li><button class="dropdown-item" @click="changeUserRole('user')">User</button></li>
+                                                <li><button class="dropdown-item"
+                                                        @click="changeUserRole('admin')">Admin</button></li>
+                                                <li><button class="dropdown-item"
+                                                        @click="changeUserRole('user')">User</button></li>
                                             </ul>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr class="py-3">
-                                    <td><span>Activity: </span></td>
-                                    <td class="px-4"><span class="text-success">Online</span></td>
-                                </tr>
-                                <tr class="py-3">
-                                    <td><span>Account Created: </span></td>
-                                    <td class="px-4"><span>{{ user.userName }}</span></td>
-                                </tr>
-                                <tr class="py-3">
-                                    <td class="align-middle"><span>Account Status: </span></td>
-                                    <td class="px-4">
-                                        <div class="dropdown align-items-center">
-                                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ user.userRole }}
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                <li><button class="dropdown-item" @click="changeUserRole('admin')">Activated</button></li>
-                                                <li><button class="dropdown-item" @click="changeUserRole('user')">Deactivated</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -96,8 +87,8 @@
                     </div>
                     <div class="col-6 d-flex justify-content-center align-items-center flex-column">
                         <div class="d-flex justify-content-evenly">
-                            <button class="btn btn-secondary mx-2 pe-3">
-                                <i class="bi bi-save me-1"></i>Save Changes</button>
+                            <button class="btn btn-secondary mx-2 pe-3" @click="addUser">
+                                <i class="bi bi-save me-1"></i>Add User</button>
                             <button class="btn btn-primary mx-2 pe-3">
                                 <i class="bi bi-envelope-fill me-1"></i>Mail User</button>
                         </div>
@@ -112,12 +103,22 @@ export default {
     name: "AdminUserEdit",
     data() {
         return {
-            userData: {}
+            userData: {
+                role: "None",
+                age: 0
+            }
         }
     },
     mounted() {
     },
     methods: {
+        changeUserRole(role){
+            this.userData.role = role
+        },
+        async addUser(){
+            await this.$store.dispatch('registerUser', this.userData);
+            await this.$store.dispatch('adminGetUsers');
+        }
     }
 }
 </script>

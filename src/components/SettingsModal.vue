@@ -106,9 +106,14 @@ export default {
             
             this.user.profile = (result) ? result.url : this.user.profile;
 
-            await this.$store.dispatch('updateUser', this.user);
             console.log("user:", this.user)
-            await this.$store.dispatch('updateUser', this.user);
+            let payload = {
+                userID: this.user.id,
+                userName: this.user.username,
+                userProfile: (result) ? result.url : this.user.profile
+            }
+
+            await this.$store.dispatch('updateUser', payload);
             await this.$store.dispatch('loadUser');
         }
     },

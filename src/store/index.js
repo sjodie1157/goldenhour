@@ -165,12 +165,12 @@ export default createStore({
                 switch( true ){
                     case reply.status >= 400:
                         alertMsg.title = "Error"
-                        alertMsg.text = "Invalid email or password"
+                        alertMsg.text = reply.msg
                         alertMsg.icon = "error"
                         break;
                     default:
                         alertMsg.title = "Success"
-                        alertMsg.text = "Login successful"
+                        alertMsg.text = reply.msg
                         alertMsg.icon = "success"
 
                         cookies.set('authToken', reply.token);
@@ -191,13 +191,7 @@ export default createStore({
         },
         async registerUser(context, payload) {
             try {
-                let result = await fetch(`${API}/register`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                })
+                let result = await sendRequest(`${API}/register`, "POST", payload);
 
                 let reply = await result.json();
                 let alertMsg = {
@@ -207,21 +201,26 @@ export default createStore({
                 }
                 console.log(reply)
                 switch( true ){
-                    case reply.status >= 300:
-                        alertMsg.title = "Confirmation"
+                    case reply.status >= 500:
+                        alertMsg.title = "Error"
                         alertMsg.text = reply.msg,
-                        alertMsg.icon = "info"
+                        alertMsg.icon = "error"
                         break;
                     case reply.status >= 400:
                         alertMsg.title = "Error"
                         alertMsg.text = reply.msg,
                         alertMsg.icon = "error"
                         break;
+                    case reply.status >= 300:
+                        alertMsg.title = "Confirmation"
+                        alertMsg.text = reply.msg,
+                        alertMsg.icon = "info"
+                        break;
                     default:
                         alertMsg.title = "Success"
                         alertMsg.text = reply.msg,
                         alertMsg.icon = "success"
-                        break
+                        break;
                 }
                 sweet(alertMsg);
             } catch(e) {
@@ -299,6 +298,8 @@ export default createStore({
                 let result = await sendRequest(`${API}/user/${payload.userID}`, "PATCH", payload);
                 let reply = await result.json();
 
+                console.log(reply)
+
                 let alertMsg = {
                     title: null,
                     text: null,
@@ -315,15 +316,14 @@ export default createStore({
                         alertMsg.title = "Error";
                         alertMsg.text = reply.msg;
                         alertMsg.icon = "error";
-                        sweet(alertMsg)
                         break;
                         default:
                             alertMsg.title = "Updated Successfully";
                             alertMsg.text = reply.msg;
                             alertMsg.icon = "success";
-                        sweet(alertMsg);
                         break;
                 }
+                sweet(alertMsg);
                 
             } catch(e) {
                 console.log(e);
