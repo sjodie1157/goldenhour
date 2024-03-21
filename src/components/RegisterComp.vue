@@ -1,10 +1,10 @@
 <template>
-    <div class="flex-fill d-flex align-items-center overflow-hidden">
-        <form ref="registerForm" class="form bg-dark-subtle shadow p-4 rounded-3 my-lg-0 my-5">
+    <div class="flex-fill d-flex align-items-center overflow-hidden p-4">
+        <form class="form bg-dark-subtle shadow p-4 rounded-3 my-lg-0 my-5">
             <h3 class="display-3 fs-3 fw-bold text-white text-center">Sign Up</h3>
             <div class="form-group">
-                <div class="d-flex">
-                    <div class="position-relative my-2 mx-2">
+                <div class="d-flex flex-column flex-md-row">
+                    <div class="position-relative my-0 my-md-2 mx-2">
                         <label for="username" class="badge bg-primary-subtle text-secondary m-1">username</label>
                         <div class="input-group mb-3">
                             <input v-model="payload.username" class="form-control shadow-none border-0" type="username"
@@ -12,7 +12,7 @@
                             <span class="input-group-text border-0" id="pass-view"><i class="bi bi-person-circle"></i></span>
                         </div>
                     </div>
-                    <div class="position-relative my-2 mx-2">
+                    <div class="position-relative my-0 my-md-2 mx-2">
                         <label for="email" class="badge bg-primary-subtle text-secondary m-1">email</label>
                         <div class="input-group mb-3">
                             <input v-model="payload.email" class="form-control shadow-none border-0" type="email"
@@ -21,8 +21,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="d-flex">
-                    <div class="position-relative my-2 mx-2">
+                <div class="d-flex flex-column flex-md-row">
+                    <div class="position-relative my-0 my-md-2 mx-2">
                         <label for="password" class="badge bg-primary-subtle text-secondary m-1">password</label>
                         <div class="input-group mb-3">
                             <input ref="password" v-model="payload.password" class="form-control shadow-none border-0" type="password"
@@ -33,7 +33,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="position-relative my-2 mx-2">
+                    <div class="position-relative my-0 my-md-2 mx-2">
                         <label for="password" class="badge bg-primary-subtle text-secondary m-1">confirm password</label>
                         <div class="input-group mb-3">
                             <input ref="confirmPassword" v-model="payload.confirmPassword" class="form-control shadow-none border-0" type="password"
@@ -53,13 +53,19 @@
                     </div>
                 </div>
                 <div class="w-100 d-flex justify-content-center">
-                    <button id="register" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">Sign Up</button>
+                    <button id="register" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">
+                        <LoaderComp v-if="signupBtnLoading" />
+                        <span v-else>Sign Up</span>
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 </template>
 <script>
+import LoaderComp from '@/components/LoaderComp.vue';
+
+
 export default {
     name: "RegisterComp",
     data() {
@@ -72,20 +78,27 @@ export default {
                 age: 0,
                 profile: null
             },
+            signupBtnLoading: false,
             showPassword: false,
             ageAppropriate: false
         }
     },
+    components: {
+        LoaderComp
+    },
     mounted() {
-        this.$refs.registerForm.onclick = (e) => {
-            e.preventDefault();
-        }
     },
     methods: {
-        submitForm(){
-            // alert('form still pending');
-            console.log(this.payload)
-            this.$store.dispatch('registerUser', this.payload);
+        async submitForm(event){
+            event.preventDefault();
+
+            event.target.setAttribute('disabled', '');
+
+            this.signupBtnLoading = true;
+            await this.$store.dispatch('registerUser', this.payload);
+            this.signupBtnLoading = false;
+
+            event.target.removeAttribute('disabled');
         },
         togglePasswordView() {
             let password = this.$refs.password;

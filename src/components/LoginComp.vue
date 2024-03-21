@@ -1,6 +1,6 @@
 <template>
-    <div class="flex-fill d-flex align-items-center overflow-hidden">
-        <form ref="loginForm" class="form bg-dark-subtle shadow p-4 rounded-3">
+    <div class="flex-fill d-flex align-items-center overflow-hidden p-4">
+        <form class="form bg-dark-subtle shadow p-4 rounded-3">
             <h3 class="display-3 fs-3 fw-bold text-white text-center">Already a user?</h3>
             <div class="form-group">
                 <div class="position-relative my-2">
@@ -41,17 +41,19 @@ export default {
                 email: "",
                 password: ""
             },
+            loginBtnLoader: false,
             showPassword: false
         }
     },
     mounted() {
-        this.$refs.loginForm.onclick = (e) => {
-            e.preventDefault();
-        }
     },
     methods: {
-        submitForm() {
-            this.$store.dispatch('signInUser', this.payload);
+        async submitForm(event) {
+            event.preventDefault();
+
+            this.loginBtnLoader = false;
+            await this.$store.dispatch('signInUser', this.payload);
+            this.loginBtnLoader = true;
         },
         togglePasswordView() {
             let input = this.$refs.password;

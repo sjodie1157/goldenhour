@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar navbar-lg-expand" v-if="navigation">
+    <nav class="navbar navbar-lg-expand sticky-top" v-if="navigation">
         <div class="container-fluid">
             <router-link to="/" class="d-none d-md-block m-0 p-0 btn border-0">
                 <h5 class="fw-bold text-secondary m-0 py-4 text-white">
@@ -31,7 +31,7 @@
             <div class="d-none d-md-block">
                 <router-link to="/"
                     :class="{ 'bg-white': !formState, 'shadow': !formState, 'text-secondary': !formState, 'text-white': formState }"
-                    class="btn rounded-pill m-1 border-0" @click="loginBtn">Login</router-link>
+                    class="btn rounded-pill m-1 border-0" @click="loginBtnSideNav">Login</router-link>
                 <router-link to="/"
                     :class="{ 'bg-white': formState, 'shadow': formState, 'text-secondary': formState, 'text-white': !formState }"
                     class="btn rounded-pill m-1 border-0" @click="registerBtn">Register</router-link>
@@ -45,33 +45,68 @@
     </nav>
     <div class="offcanvas offcanvas-start" id="mainNav" data-bs-backdrop="true">
         <div class="d-flex justify-content-end">
-            <button class="btn app-btn-dark border-0 ms-auto rounded-0" data-bs-dismiss="offcanvas"><i class="bi bi-box-arrow-right"></i></button>
+            <button class="btn app-btn-dark border-0 ms-auto rounded-0" data-bs-dismiss="offcanvas"><i
+                    class="bi bi-box-arrow-right"></i></button>
         </div>
         <router-link to="/" class="p-4 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
-            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100" @mouseenter="navItemEnter" @mouseleave="navItemLeave">
+            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100"
+                @mouseenter="navItemEnter" @mouseleave="navItemLeave" @click="changeRoute('home')" :class="{ 'bg-secondary-subtle': currentRoute == 0 }">
                 <div class="p-4 position-relative border border-1 rounded-3 ms-3">
-                    <i class="bi bi-house-door-fill position-absolute top-50 start-50 translate-middle text-primary fs-4 user-select-none"></i>
+                    <i
+                        class="bi bi-house-door-fill position-absolute top-50 start-50 translate-middle text-primary fs-4 user-select-none"></i>
                 </div>
                 <span class="text-secondary mx-auto user-select-none">Home</span>
             </div>
         </router-link>
-        <router-link to="/about" class="p-4 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
-            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100" @mouseenter="navItemEnter" @mouseleave="navItemLeave">
+        <router-link to="/about"
+            class="p-4 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
+            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100"
+                @mouseenter="navItemEnter" @mouseleave="navItemLeave" @click="changeRoute('about')" :class="{ 'bg-secondary-subtle': currentRoute == 1 }">
                 <div class="p-4 position-relative border border-1 rounded-3 ms-3">
-                    <i class="bi bi-info-circle position-absolute top-50 start-50 translate-middle text-secondary fs-4 user-select-none"></i>
+                    <i
+                        class="bi bi-info-circle position-absolute top-50 start-50 translate-middle text-secondary fs-4 user-select-none"></i>
                 </div>
                 <span class="text-secondary mx-auto user-select-none">About</span>
             </div>
         </router-link>
-        <router-link to="/contact" class="p-4 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
-            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100" @mouseenter="navItemEnter" @mouseleave="navItemLeave">
+        <router-link to="/contact"
+            class="p-4 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
+            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100"
+                @mouseenter="navItemEnter" @mouseleave="navItemLeave" @click="changeRoute('contact')" :class="{ 'bg-secondary-subtle': currentRoute == 2 }">
                 <div class="p-4 position-relative border border-1 rounded-3 ms-3">
-                    <i class="bi bi-person-lines-fill position-absolute top-50 start-50 translate-middle text-secondary fs-4 user-select-none"></i>
+                    <i
+                        class="bi bi-person-lines-fill position-absolute top-50 start-50 translate-middle text-secondary fs-4 user-select-none"></i>
                 </div>
                 <span class="text-secondary mx-auto user-select-none">Contact</span>
             </div>
         </router-link>
-        
+        <div class="border-bottom border-1 py-2"></div>
+        <router-link to="/"
+            class="p-4 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
+            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100"
+                @mouseenter="navItemEnter" @mouseleave="navItemLeave" :class="{
+                    'shadow': !formState
+                }" @click="loginBtn">
+                <div class="p-4 position-relative border border-1 rounded-3 ms-3">
+                    <i
+                        class="bi bi-door-open position-absolute top-50 start-50 translate-middle text-secondary fs-4 user-select-none"></i>
+                </div>
+                <span class="text-secondary mx-auto user-select-none">Login</span>
+            </div>
+        </router-link>
+        <router-link to="/"
+            class="p-4 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
+            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100"
+                @mouseenter="navItemEnter" @mouseleave="navItemLeave" :class="{
+                    'shadow': formState
+                }" @click="registerBtn">
+                <div class="p-4 position-relative border border-1 rounded-3 ms-3">
+                    <i
+                        class="bi bi-person-add position-absolute top-50 start-50 translate-middle text-secondary fs-4 user-select-none"></i>
+                </div>
+                <span class="text-secondary mx-auto user-select-none">Sign Up</span>
+            </div>
+        </router-link>
     </div>
 </template>
 <script>
@@ -151,6 +186,12 @@ export default {
         },
         registerBtn() {
             this.$store.dispatch('formState', true);
+        },
+        loginBtnSideNav(){
+            this.loginBtn();
+
+            let userForm = this.$refs.userForm;
+            userForm.scrollIntoView({behavior: 'smooth'});
         }
     }
 }

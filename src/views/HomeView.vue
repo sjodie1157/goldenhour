@@ -1,7 +1,7 @@
 <template>
-    <main class="flex-fill container-fluid" @load="alertConcern">
+    <main class="vh-100 flex-fill container-fluid" @load="alertConcern">
         <div class="row flex-column-reverse flex-lg-row">
-            <div class="col-sm-12 col-lg-6 d-flex flex-column justify-content-top align-items-center">
+            <div ref="userForm" class="col-sm-12 col-lg-6 d-flex flex-column justify-content-top align-items-center">
                 <div class="d-flex flex-column mt-4">
                     <h4 class="display-4 fw-bold position-relative text-white d-none d-lg-flex flex-column">
                         CapstoneBud

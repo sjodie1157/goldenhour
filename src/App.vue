@@ -1,7 +1,7 @@
 <template>
-    <div class="vh-100 d-flex flex-column">
+    <div class="main d-flex flex-column">
         <NavComp />
-        <router-view />
+        <router-view/>
     </div>
     <FooterComp />
 </template>
@@ -27,7 +27,11 @@ export default {
     --dark-subtle: rgb(151,107,182);
 }
 
+
 body {
+    /* background: linear-gradient(var(--dark) -70%, white 100%); */
+}
+.main {
     background: linear-gradient(var(--dark) -70%, white 100%);
 }
 
