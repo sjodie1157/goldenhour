@@ -148,7 +148,7 @@ class User {
                     msg: "This is not allowed"
                 })
             } else {
-                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile, accountCreated FROM Users;`;
+                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile, accountCreated FROM Users ORDER BY accountCreated DESC;`;
 
                 db.query(getUsers, (err, result)=>{
                     if(err) throw err;
@@ -305,6 +305,7 @@ class User {
                 status: code.UNAUTHORIZED,
                 msg: "Please login in"
             })
+            return;
         } else {
             token = token.split(' ').at(-1);
         }
@@ -364,12 +365,14 @@ class User {
                         msg: "Account updated successfully",
                         new_token
                     })
+                    return;
                 })
             } else {
                 res.status(code.UNAUTHORIZED).send({
                     status: code.UNAUTHORIZED,
                     msg: "Invalid account to update"
                 })
+                return
             }
 
         } catch (e) {
