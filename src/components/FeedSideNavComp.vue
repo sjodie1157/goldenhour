@@ -1,5 +1,6 @@
 <template>
     <div class="sideNav bg-primary-subtle" v-if="user && posts">
+        <button class="btn app-btn-dark rounded-0 shadow-none" data-bs-dismiss="offcanvas"><i class="bi bi-box-arrow-right"></i></button>
         <div class="profile_and_search p-4">
             <div class="input-group mb-3 px-4">
                 <span class="input-group-text border-0" id="search"><i
@@ -57,7 +58,7 @@ export default {
             let posts = this.posts.filter( (post)=>{
                 return post.postComment.toLowerCase().includes(_searchInput) || post.userName.toLowerCase().includes(_searchInput)
             } )
-            this.$store.dispatch('setPostSearch', posts)
+            this.$store.dispatch('setPostSearch', posts);
 
         }
     }

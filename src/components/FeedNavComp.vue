@@ -32,14 +32,6 @@
                 <span class="text-secondary mx-auto user-select-none">Admin</span>
             </div>
         </router-link>
-        <!-- <router-link to="/contact" class="px-4 pt-2 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
-            <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100" @mouseenter="navItemEnter" @mouseleave="navItemLeave">
-                <div class="p-4 position-relative border border-1 rounded-3 ms-3">
-                    <i class="bi bi-rss position-absolute top-50 start-50 translate-middle text-secondary fs-3 user-select-none"></i>
-                </div>
-                <span class="text-secondary mx-auto user-select-none">Contact</span>
-            </div>
-        </router-link> -->
         <router-link to="/about" class="px-4 pt-2 pb-4 border-bottom border-1 pb-0 d-flex align-items-center justify-content-between text-decoration-none">
             <div class="sideNav py-2 rounded-2 d-flex align-items-center justify-content-between w-100" @mouseenter="navItemEnter" @mouseleave="navItemLeave">
                 <div class="p-4 position-relative border border-1 rounded-3 ms-3">

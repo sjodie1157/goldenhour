@@ -6,8 +6,8 @@ import sweet from 'sweetalert';
 import { useCookies } from 'vue3-cookies';
 import router from '@/router';
 
-const API = "http://localhost:5000";
-// const API = "https://capstonebud.onrender.com";
+// const API = "http://localhost:5000";
+const API = "https://capstonebud.onrender.com";
 
 const { cookies } = useCookies();
 
