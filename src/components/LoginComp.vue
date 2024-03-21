@@ -25,13 +25,6 @@
                 <div class="w-100 d-flex justify-content-center mt-2">
                     <router-link to="" class="forgot-password text-decoration-none">Forgot password</router-link>
                 </div>
-                <!-- <div class="error-msg mt-3 d-flex justify-content-center align-items-center">
-                    <i class="bi bi-exclamation text-danger fs-3"></i>
-                    <div class="py-1 px-2 bg-danger rounded-3">
-                        <small class="text-white">Account does not exist</small>
-                    </div>
-                    <i class="bi bi-exclamation text-danger fs-3"></i>
-                </div> -->
                 <div class="w-100 d-flex justify-content-center">
                     <button id="login" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">Login</button>
                 </div>
