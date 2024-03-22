@@ -1,6 +1,6 @@
 <template>
-    <div class="flex-fill d-flex align-items-center overflow-hidden">
-        <form ref="loginForm" class="form bg-dark-subtle shadow p-4 rounded-3">
+    <div class="flex-fill d-flex align-items-center overflow-hidden p-4">
+        <form class="form bg-dark-subtle shadow p-4 rounded-3">
             <h3 class="display-3 fs-3 fw-bold text-white text-center">Already a user?</h3>
             <div class="form-group">
                 <div class="position-relative my-2">
@@ -25,21 +25,19 @@
                 <div class="w-100 d-flex justify-content-center mt-2">
                     <router-link to="" class="forgot-password text-decoration-none">Forgot password</router-link>
                 </div>
-                <!-- <div class="error-msg mt-3 d-flex justify-content-center align-items-center">
-                    <i class="bi bi-exclamation text-danger fs-3"></i>
-                    <div class="py-1 px-2 bg-danger rounded-3">
-                        <small class="text-white">Account does not exist</small>
-                    </div>
-                    <i class="bi bi-exclamation text-danger fs-3"></i>
-                </div> -->
                 <div class="w-100 d-flex justify-content-center">
-                    <button id="login" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">Login</button>
+                    <button id="login" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">
+                        <LoaderComp v-if="loginBtnLoader" :dummyText="'Login'" />
+                        <span v-else>Login</span>
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 </template>
 <script>
+import LoaderComp from '@/components/LoaderComp.vue';
+
 export default {
     name: "LoginComp",
     data() {
@@ -48,17 +46,22 @@ export default {
                 email: "",
                 password: ""
             },
+            loginBtnLoader: false,
             showPassword: false
         }
     },
+    components: {
+        LoaderComp
+    },
     mounted() {
-        this.$refs.loginForm.onclick = (e) => {
-            e.preventDefault();
-        }
     },
     methods: {
-        submitForm() {
-            this.$store.dispatch('signInUser', this.payload);
+        async submitForm(event) {
+            event.preventDefault();
+
+            this.loginBtnLoader = true;
+            await this.$store.dispatch('signInUser', this.payload);
+            this.loginBtnLoader = false;
         },
         togglePasswordView() {
             let input = this.$refs.password;

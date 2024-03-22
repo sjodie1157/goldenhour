@@ -12,10 +12,15 @@
             <button class="btn border-2 border-primary bg-secondary rounded-4 mx-1"><i
                     class="bi bi-plus-lg text-secondary"></i></button>
         </div>
-        <button class="app-btn-dark opacity-75 mt-3 mb-2 btn border-0 ms-2" data-bs-target="#postAdd" data-bs-toggle="modal">
-            <i class="bi bi-chat-left-text-fill me-1"></i>
-            Add Post
-        </button>
+        <div class="mt-3 mb-2 d-flex align-items-center justify-content-between">
+            <button class="app-btn-dark opacity-75 btn border-0 ms-2" data-bs-target="#postAdd" data-bs-toggle="modal">
+                <i class="bi bi-chat-left-text-fill me-1"></i>
+                Add Post
+            </button>
+            <button class="btn app-btn-dark opacity-75 border-0 ms-2 d-block d-lg-none" data-bs-target="#sideNav" data-bs-toggle="offcanvas" aria-controls="offcanvasScrolling">
+                <i class="bi bi-three-dots"></i>
+            </button>
+        </div>
         <PostAddModal />
     </div>
 </template>

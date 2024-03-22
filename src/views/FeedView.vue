@@ -1,17 +1,18 @@
 <template>
     <div class="container-fluid vh-100">
         <div class="row">
-            <div class="col-3 bg-body-tertiary vh-100 p-0 d-flex flex-column">
+            <div class="col-3 bg-body-tertiary vh-100 p-0 d-none d-lg-flex flex-column">
                 <FeedSideNavComp v-if="user" :user='{
                     username: user.username,
                     email: user.email
                 }' />
                 <FeedNavComponent />
             </div>
-            <div class="col-6 bg-white px-3 vh-100 d-flex flex-column">
+            <div class="col-sm-12 col-md-8 col-lg-6 bg-white px-3 vh-100 d-flex flex-column">
                 <PostNavComponent />
-                <div class="posts flex-fill overflow-auto pb-4" v-if="posts && user">
-                    <PostComponent v-for="post in posts" :key="post" :user='{
+                <div class="posts flex-fill overflow-auto pb-4" v-if="postSearch && user">
+                    <PostComponent v-for="post in postSearch" :key="post" :user='{
+                        userID: post.userID,
                         username: post.userName,
                         profile: post.userProfile,
                         hasFullOptions: (post.userID == user.id) || user.role == "admin"
@@ -23,14 +24,25 @@
                         postID: post.postID
                     }' />
                 </div>
+                <div v-else>
+                    <PostLoadingComp />
+                </div>
             </div>
-            <div class="col-3 p-3 vh-100 bg-white">
+            <div class="col-md-4 col-lg-3 p-3 vh-100 bg-white d-none d-md-block d-lg-block">
                 <QuickChatComp />
+            </div>
+            <div class="offcanvas offcanvas-start p-0" data-bs-scroll="true" data-bs-backdrop="false" id="sideNav">
+                <FeedSideNavComp v-if="user" :user='{
+                    username: user.username,
+                    email: user.email
+                }' />
+                <FeedNavComponent />
             </div>
         </div>
         <PostEditModal />
         <SettingsModal />
         <CommentModal />
+        <UserProfile />
     </div>
 </template>
 <script>
@@ -42,6 +54,8 @@ import PostEditModal from '@/components/PostEditModal.vue';
 import SettingsModal from '@/components/SettingsModal.vue';
 import QuickChatComp from '@/components/QuickChatComp.vue';
 import CommentModal from '@/components/CommentModal.vue';
+import PostLoadingComp from '@/components/PostLoadingComp.vue';
+import UserProfile from '@/components/UserProfile.vue';
 
 export default {
     name: "FeedView",
@@ -58,7 +72,9 @@ export default {
         PostEditModal,
         SettingsModal,
         QuickChatComp,
-        CommentModal
+        CommentModal,
+        PostLoadingComp,
+        UserProfile
     },
     async mounted() {
         this.$store.state.display_nav = false;
@@ -76,7 +92,11 @@ export default {
             return this.$store.state.user;
         },
         posts() {
-            return this.$store.state.posts;
+            let posts = this.$store.state.posts;
+            return posts;
+        },
+        postSearch() {
+            return this.$store.state.postSearch;
         }
     },
     methods: {

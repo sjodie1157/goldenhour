@@ -22,7 +22,9 @@ export default createStore({
         users: null,
         currentEditPost: null,
         currentUserPost: null,
-        postComments: null
+        currentUserProfile: null,
+        postComments: null,
+        postSearch: null
     },
     getters: {},
     mutations: {
@@ -34,6 +36,7 @@ export default createStore({
         },
         setPosts(state, value) {
             state.posts = value
+            state.postSearch = value
         },
         setFormState(state, value) {
             state.formState = value;
@@ -49,11 +52,20 @@ export default createStore({
         },
         setPostComments(state, value){
             state.postComments = value;
+        },
+        setPostSearch(state, value){
+            state.postSearch = value;
+        },
+        setCurrentUserProfile(state, value){
+            state.currentUserProfile = value
         }
     },
     actions: {
         navbar(context, payload){
             context.commit('setNavDisplay', payload);
+        },
+        setPostSearch(context, payload){
+            context.commit('setPostSearch', payload)
         },
         redirect(context, route){
             router.push(`/${route}`);
@@ -72,6 +84,18 @@ export default createStore({
             cookies.remove('authToken');
             context.commit('setNavDisplay', true)
             this.dispatch('redirect', '')
+        },
+        async setCurrentUserProfile(context, payload){
+            try {
+                console.log(payload)
+                let result = await sendRequest(`${API}/user/${payload}`);
+                let reply = await result.json();
+
+                console.log(reply.result[0])
+                context.commit("setCurrentUserProfile", reply.result[0] );
+            } catch(e){
+                console.log(e)
+            }
         },
         async loadUser(context){
             let user = getUserFromToken();
@@ -165,12 +189,12 @@ export default createStore({
                 switch( true ){
                     case reply.status >= 400:
                         alertMsg.title = "Error"
-                        alertMsg.text = "Invalid email or password"
+                        alertMsg.text = reply.msg
                         alertMsg.icon = "error"
                         break;
                     default:
                         alertMsg.title = "Success"
-                        alertMsg.text = "Login successful"
+                        alertMsg.text = reply.msg
                         alertMsg.icon = "success"
 
                         cookies.set('authToken', reply.token);
@@ -191,13 +215,7 @@ export default createStore({
         },
         async registerUser(context, payload) {
             try {
-                let result = await fetch(`${API}/register`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                })
+                let result = await sendRequest(`${API}/register`, "POST", payload);
 
                 let reply = await result.json();
                 let alertMsg = {
@@ -207,21 +225,26 @@ export default createStore({
                 }
                 console.log(reply)
                 switch( true ){
-                    case reply.status >= 300:
-                        alertMsg.title = "Confirmation"
+                    case reply.status >= 500:
+                        alertMsg.title = "Error"
                         alertMsg.text = reply.msg,
-                        alertMsg.icon = "info"
+                        alertMsg.icon = "error"
                         break;
                     case reply.status >= 400:
                         alertMsg.title = "Error"
                         alertMsg.text = reply.msg,
                         alertMsg.icon = "error"
                         break;
+                    case reply.status >= 300:
+                        alertMsg.title = "Confirmation"
+                        alertMsg.text = reply.msg,
+                        alertMsg.icon = "info"
+                        break;
                     default:
                         alertMsg.title = "Success"
                         alertMsg.text = reply.msg,
                         alertMsg.icon = "success"
-                        break
+                        break;
                 }
                 sweet(alertMsg);
             } catch(e) {
@@ -299,6 +322,8 @@ export default createStore({
                 let result = await sendRequest(`${API}/user/${payload.userID}`, "PATCH", payload);
                 let reply = await result.json();
 
+                console.log(reply)
+
                 let alertMsg = {
                     title: null,
                     text: null,
@@ -315,15 +340,14 @@ export default createStore({
                         alertMsg.title = "Error";
                         alertMsg.text = reply.msg;
                         alertMsg.icon = "error";
-                        sweet(alertMsg)
                         break;
                         default:
                             alertMsg.title = "Updated Successfully";
                             alertMsg.text = reply.msg;
                             alertMsg.icon = "success";
-                        sweet(alertMsg);
                         break;
                 }
+                sweet(alertMsg);
                 
             } catch(e) {
                 console.log(e);

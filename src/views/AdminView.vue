@@ -1,22 +1,28 @@
 <template>
     <div class="container-fluid vh-100" v-if="user">
         <div class="row" v-if="user.role == 'admin'">
-            <div class="col-3 bg-body-tertiary vh-100 p-0 d-flex flex-column">
+            <div class="d-none col-3 bg-body-tertiary vh-100 p-0 d-lg-flex flex-column">
                 <FeedSideNavComp v-if="user" :user='{
         username: user.username,
         email: user.email
     }' />
-            <FeedNavComponent v-if="user.role == 'admin'" />
+                <FeedNavComponent v-if="user.role == 'admin'" />
             </div>
-            <div class="col-9 bg-white px-3 vh-100 d-flex flex-column">
-                <div class="bg-dark-subtle my-3 p-3 rounded-1 fw-bold fs-5 text-white border border-2 text-center">Admin
-                    Panel</div>
-                <div class="container mt-0 p-3 bg-dark-subtle rounded-3 overflow-auto border border-2 user-select-none">
-                    <div class="row my-3 px-5">
-                        <div class="col d-flex align-items-center justify-content-start">
+            <div class="col-lg-9 col-md-12 bg-white px-3 vh-100 d-flex flex-column">
+                <div class="bg-dark-subtle my-3 p-3 rounded-1 fw-bold fs-5 text-white border border-2 text-center d-flex justify-content-between align-items-center">
+                    <span >Admin Panel</span>
+                    <button class="btn app-btn-dark opacity-75 border-0 ms-2 d-block d-lg-none"
+                        data-bs-target="#adminSideNav" data-bs-toggle="offcanvas" aria-controls="offcanvasScrolling">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                </div>
+                <div
+                    class="container-fluid mt-0 p-3 bg-dark-subtle rounded-3 overflow-auto border border-2 user-select-none">
+                    <div class="row my-3 px-lg-5">
+                        <div class="col-lg col-sm-12 my-2 my-lg-0 d-flex align-items-center justify-content-lg-start justify-content-center">
                             <h5 class="text-white fs-4 m-0">User Accounts</h5>
                         </div>
-                        <div class="col d-flex align-items-center justify-content-center">
+                        <div class="col-lg col-sm-12 d-flex align-items-center justify-content-center">
                             <div class="input-group">
                                 <input ref="searchInput" class="form-control shadow-none border-0"
                                     placeholder="search for user">
@@ -26,8 +32,10 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col d-flex align-items-center justify-content-end">
-                            <button class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7" data-bs-target="#userAdd" data-bs-toggle="modal">
+                        <div class="col-lg col-sm-12 my-2 my-md-2 my-sm-0 d-flex align-items-center justify-content-sm-end justify-content-lg-center">
+                            <button
+                                class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7"
+                                data-bs-target="#userAdd" data-bs-toggle="modal">
                                 <span><i class="bi bi-person-fill-add"></i></span>
                                 <small class="mx-2">Add User</small>
                             </button>
@@ -50,7 +58,7 @@
                                 <td class="align-middle"><small>{{ user.userName }}</small></td>
                                 <td class="align-middle"><small>{{ user.userRole }}</small></td>
                                 <td class="align-middle"><small>{{ user.userEmail }}</small></td>
-                                <td class="align-middle"><small>{{ user.userProfile }}</small></td>
+                                <td class="align-middle"><small><a :href="user.userProfile" target="_blank" class="text-truncate">{{ user.userProfile }}</a></small></td>
                                 <td class="d-flex flex-column justify-content-center align-items-center">
                                     <button class="btn btn-danger my-1" data-bs-target="#userEdit"
                                         data-bs-toggle="modal" @click="manageUser(user)">Manage</button>
@@ -62,7 +70,16 @@
             </div>
         </div>
     </div>
-    <AdminUserEdit :userID='userID'/>
+    <div class="offcanvas offcanvas-start" id="adminSideNav" data-bs-scroll="true" data-bs-backdrop="false">
+        <div class="bg-body-tertiary vh-100 p-0 d-lg-flex flex-column">
+            <FeedSideNavComp v-if="user" :user='{
+        username: user.username,
+        email: user.email
+    }' />
+            <FeedNavComponent v-if="user.role == 'admin'" />
+        </div>
+    </div>
+    <AdminUserEdit :userID='userID' />
     <AdminAddUser />
     <SettingsModal />
 </template>
@@ -75,7 +92,7 @@ import SettingsModal from '@/components/SettingsModal.vue';
 
 export default {
     name: "AdminView",
-    data(){
+    data() {
         return {
             userID: null
         }
@@ -112,7 +129,7 @@ export default {
             let searchInput = this.$refs.searchInput;
             this.$store.dispatch('adminSearchUser', searchInput.value);
         },
-        manageUser(user){
+        manageUser(user) {
             this.userID = user.userID;
         },
         searchEnter() { },
