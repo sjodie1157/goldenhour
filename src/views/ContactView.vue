@@ -11,9 +11,32 @@
                     </h4>
                 </div>
             </div>
+            <div class="col-3"></div>
+            <div class="col-6">
+                <form>
+                    <div class="form-floating my-2">
+                        <input id='name' type="text" class="form-control" placeholder="Name">
+                        <label for="name">Name</label>
+                    </div>
+                    <div class="form-floating my-2">
+                        <input id='email' type="text" class="form-control" placeholder="Email">
+                        <label for="email">Email</label>
+                    </div>
+                    <div class="form-floating my-2">
+                        <textarea id='message' class="form-control" placeholder="Enter your message"></textarea>
+                        <label for="message">Enter your message</label>
+                    </div>
+                </form>
+            </div>
+            <div class="col-3"></div>
         </div>
     </main>
 </template>
+<script>
+export default {
+
+}
+</script>
 <style scoped>
 .description {
     font-size: small !important;

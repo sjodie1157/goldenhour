@@ -18,11 +18,11 @@
                 </div>
                 <div
                     class="container-fluid mt-0 p-3 bg-dark-subtle rounded-3 overflow-auto border border-2 user-select-none">
-                    <div class="row my-3 px-5">
-                        <div class="col d-flex align-items-center justify-content-start">
+                    <div class="row my-3 px-lg-5">
+                        <div class="col-lg col-sm-12 my-2 my-lg-0 d-flex align-items-center justify-content-lg-start justify-content-center">
                             <h5 class="text-white fs-4 m-0">User Accounts</h5>
                         </div>
-                        <div class="col d-flex align-items-center justify-content-center">
+                        <div class="col-lg col-sm-12 d-flex align-items-center justify-content-center">
                             <div class="input-group">
                                 <input ref="searchInput" class="form-control shadow-none border-0"
                                     placeholder="search for user">
@@ -32,7 +32,7 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="col d-flex align-items-center justify-content-end">
+                        <div class="col-lg col-sm-12 my-2 my-md-2 my-sm-0 d-flex align-items-center justify-content-sm-end justify-content-lg-center">
                             <button
                                 class="btn bg-secondary-subtle border-2 border-secondary-subtle p-1 fw-normal px-2 shadow fs-7"
                                 data-bs-target="#userAdd" data-bs-toggle="modal">

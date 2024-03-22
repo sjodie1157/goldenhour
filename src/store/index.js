@@ -6,8 +6,8 @@ import sweet from 'sweetalert';
 import { useCookies } from 'vue3-cookies';
 import router from '@/router';
 
-// const API = "http://localhost:5000";
-const API = "https://capstonebud.onrender.com";
+const API = "http://localhost:5000";
+// const API = "https://capstonebud.onrender.com";
 
 const { cookies } = useCookies();
 
@@ -22,6 +22,7 @@ export default createStore({
         users: null,
         currentEditPost: null,
         currentUserPost: null,
+        currentUserProfile: null,
         postComments: null,
         postSearch: null
     },
@@ -54,6 +55,9 @@ export default createStore({
         },
         setPostSearch(state, value){
             state.postSearch = value;
+        },
+        setCurrentUserProfile(state, value){
+            state.currentUserProfile = value
         }
     },
     actions: {
@@ -80,6 +84,18 @@ export default createStore({
             cookies.remove('authToken');
             context.commit('setNavDisplay', true)
             this.dispatch('redirect', '')
+        },
+        async setCurrentUserProfile(context, payload){
+            try {
+                console.log(payload)
+                let result = await sendRequest(`${API}/user/${payload}`);
+                let reply = await result.json();
+
+                console.log(reply.result[0])
+                context.commit("setCurrentUserProfile", reply.result[0] );
+            } catch(e){
+                console.log(e)
+            }
         },
         async loadUser(context){
             let user = getUserFromToken();

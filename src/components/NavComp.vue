@@ -208,4 +208,7 @@ export default {
     background-size: contain;
     background-position: center;
 }
+.navbar {
+    backdrop-filter: blur(10px);
+}
 </style>

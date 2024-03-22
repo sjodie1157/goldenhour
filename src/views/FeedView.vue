@@ -12,6 +12,7 @@
                 <PostNavComponent />
                 <div class="posts flex-fill overflow-auto pb-4" v-if="postSearch && user">
                     <PostComponent v-for="post in postSearch" :key="post" :user='{
+                        userID: post.userID,
                         username: post.userName,
                         profile: post.userProfile,
                         hasFullOptions: (post.userID == user.id) || user.role == "admin"
@@ -41,6 +42,7 @@
         <PostEditModal />
         <SettingsModal />
         <CommentModal />
+        <UserProfile />
     </div>
 </template>
 <script>
@@ -53,6 +55,7 @@ import SettingsModal from '@/components/SettingsModal.vue';
 import QuickChatComp from '@/components/QuickChatComp.vue';
 import CommentModal from '@/components/CommentModal.vue';
 import PostLoadingComp from '@/components/PostLoadingComp.vue';
+import UserProfile from '@/components/UserProfile.vue';
 
 export default {
     name: "FeedView",
@@ -70,7 +73,8 @@ export default {
         SettingsModal,
         QuickChatComp,
         CommentModal,
-        PostLoadingComp
+        PostLoadingComp,
+        UserProfile
     },
     async mounted() {
         this.$store.state.display_nav = false;

@@ -4,7 +4,7 @@
             "background-image": `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(${post.image})`
         }'>
             <div class="d-flex p-2 align-items-center justify-content-between">
-                <div class="self-contact d-flex justify-content-center rounded-4">
+                <div class="self-contact d-flex justify-content-center rounded-4" @click="showUserProfile" data-bs-target="#userProfile" data-bs-toggle="modal">
                     <div class="profile_picture position-relative m-1 bg-secondary shadow rounded-4 p-4" :style='{
             "background-image": `url(${user.profile})`
         }'><i class="bi bi-person-fill position-absolute fs-4 top-50 start-50 translate-middle text-white"
@@ -50,7 +50,7 @@
         </div>
         <div ref="dropdown" show-dropdown="false"
             class="app-dropdown z-1 position-absolute bg-white top-0 end-0 py-0 rounded-2 col-sm-6 col-lg-4 m-5 shadow text-dark border border-secondary-subtle border-2 overflow-hidden">
-            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
+            <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0" data-bs-target="#userProfile" data-bs-toggle="modal" @click="showUserProfile"><i
                     class="bi bi-person-circle me-2"></i><small class="me-2">User Profile</small></button>
             <button class="btn btn-outline-secondary w-100 py-2 my-0 border-0 rounded-0"><i
                     class="bi bi-clipboard me-2"></i><small class="me-2">Copy Link</small></button>
@@ -104,6 +104,9 @@ export default {
 
             await this.$store.dispatch('setCurrentEditPost', data);
             await this.$store.dispatch('getPostComments', this.post.postID)
+        },
+        async showUserProfile(){
+            await this.$store.dispatch('setCurrentUserProfile', this.post.userID);
         }
     }
 }
