@@ -148,7 +148,7 @@ class User {
                     msg: "This is not allowed"
                 })
             } else {
-                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile, accountCreated FROM Users;`;
+                const getUsers = `SELECT userID, userName, userEmail, userRole, userProfile, accountCreated FROM Users ORDER BY accountCreated DESC;`;
 
                 db.query(getUsers, (err, result)=>{
                     if(err) throw err;
@@ -169,8 +169,11 @@ class User {
         // account has to be upgraded to premium
         // age restriction, 13+
         let data = req.body;
+        let _token = req.headers['authorization'];
 
-        if (!data.username || !data.email || !data.password || (typeof data.age != 'number' && data.age >= 13)) {
+        console.log(_token)
+
+        if (!data.username || !data.email || !data.password ) {
             res.status(code.BADREQUEST).send({
                 status: code.BADREQUEST,
                 msg: "Invalid information provided"
@@ -203,12 +206,36 @@ class User {
         // token to check if the url is still valid
         let redirectUrl = `${PROTO}://${APP_DOMAIN}/verify?token=${token}`;
 
-        mail(
-            data.email,
-            "Please confirm your email address",
-            "This message is sent to you by capstonebud app.",
-            `<a href='${redirectUrl}'>Verify Email</a>`
-        );
+        if(_token){
+            _token = _token.split(' ').at(-1)
+            try {
+                let user = verifyAToken(_token);
+
+                console.log("user creating the account: ", user)
+
+                if(user.role == 'admin'){
+                    req.query['token'] = token
+                    this.verifyUserEmail(req, res);
+                    return;
+                } else {
+                    res.status(code.FORBIDDEN).send({
+                        status: code.FORBIDDEN,
+                        msg: "You not allowed to do this"
+                    })
+                    return;
+                }
+            } catch(e) {
+                handleAuthError(e, req, res);
+                return;
+            }
+        } else {
+            mail(
+                data.email,
+                "Please confirm your email address",
+                "This message is sent to you by capstonebud app.",
+                `<a href='${redirectUrl}'>Verify Email</a>`
+            );
+        }
 
         res.status(code.SEEOTHER).send({
             status: code.SEEOTHER,
@@ -236,7 +263,10 @@ class User {
 
 
             db.query(qry, [payload], (err) => {
-                if (err) throw err
+                if (err){
+                    DatabaseErrorHandling(err, req, res);
+                    return;
+                }
                 delete payload['userPass'];
                 // token = createToken(payload, '7d');
                 // res.json({
@@ -275,6 +305,7 @@ class User {
                 status: code.UNAUTHORIZED,
                 msg: "Please login in"
             })
+            return;
         } else {
             token = token.split(' ').at(-1);
         }
@@ -334,12 +365,14 @@ class User {
                         msg: "Account updated successfully",
                         new_token
                     })
+                    return;
                 })
             } else {
                 res.status(code.UNAUTHORIZED).send({
                     status: code.UNAUTHORIZED,
                     msg: "Invalid account to update"
                 })
+                return
             }
 
         } catch (e) {
