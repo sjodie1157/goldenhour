@@ -1,9 +1,17 @@
 <template>
     <div class="text-white dummy-text position-relative">
-        Sign Up
+        {{dummyText}}
         <span class="spinner position-absolute p-2 rounded-circle border border-2 start-50 top-50"></span>
     </div>
 </template>
+<script>
+export default {
+    name: "LoaderComp",
+    props: {
+        dummyText: String
+    }
+}
+</script>
 <style scoped>
 .dummy-text {
     color: transparent !important;

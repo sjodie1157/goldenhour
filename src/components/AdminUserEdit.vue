@@ -1,5 +1,5 @@
 <template>
-    <div class="modal modal-xl fade" id="userEdit">
+    <div class="modal fade" id="userEdit">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-3">
                 <div class="row g-0">
@@ -12,7 +12,7 @@
                     </div>
                 </div>
                 <div class="row g-0 pt-5" v-if="currentUser">
-                    <div class="col-6 d-flex justify-content-center">
+                    <div class="col-12 d-flex justify-content-center">
                         <div>
                             <div class="bg-secondary p-5 rounded-3 position-relative">
                                 <div class="p-5">
@@ -24,7 +24,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 d-flex justify-content-center align-items-start flex-column px-5">
+                    <div class="col-12 d-flex justify-content-center">
+                        <div>
+                            <div class="d-flex justify-content-center">
+                                <button class="btn btn-danger mx-1 my-2 pe-3">
+                                    <i class="bi bi-trash me-1"></i>Delete</button>
+                                <button class="btn btn-secondary mx-1 my-2 pe-3">
+                                    <i class="bi bi-upload me-1"></i>Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-0 pb-5" v-if="currentUser">
+                    <div class="col-12 d-flex justify-content-center align-items-start flex-column px-5">
                         <table class="table">
                             <thead>
                             </thead>
@@ -86,19 +98,7 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-                <div class="row g-0 pb-5" v-if="currentUser">
-                    <div class="col-6 d-flex justify-content-center">
-                        <div>
-                            <div class="d-flex justify-content-center">
-                                <button class="btn btn-danger mx-1 my-2 pe-3">
-                                    <i class="bi bi-trash me-1"></i>Delete</button>
-                                <button class="btn btn-secondary mx-1 my-2 pe-3">
-                                    <i class="bi bi-upload me-1"></i>Upload</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 d-flex justify-content-center align-items-center flex-column">
+                    <div class="col-12 d-flex justify-content-center align-items-center flex-column">
                         <div class="d-flex justify-content-evenly">
                             <button class="btn btn-secondary mx-2 pe-3" @click="saveChanges">
                                 <i class="bi bi-save me-1"></i>Save Changes</button>

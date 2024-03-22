@@ -191,7 +191,9 @@ export default {
             this.loginBtn();
 
             let userForm = this.$refs.userForm;
-            userForm.scrollIntoView({behavior: 'smooth'});
+            if(userForm){
+                userForm.scrollIntoView({behavior: 'smooth'});
+            }
         }
     }
 }

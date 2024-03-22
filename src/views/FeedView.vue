@@ -30,7 +30,7 @@
             <div class="col-md-4 col-lg-3 p-3 vh-100 bg-white d-none d-md-block d-lg-block">
                 <QuickChatComp />
             </div>
-            <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" id="sideNav">
+            <div class="offcanvas offcanvas-start p-0" data-bs-scroll="true" data-bs-backdrop="false" id="sideNav">
                 <FeedSideNavComp v-if="user" :user='{
                     username: user.username,
                     email: user.email

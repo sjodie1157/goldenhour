@@ -54,7 +54,7 @@
                 </div>
                 <div class="w-100 d-flex justify-content-center">
                     <button id="register" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">
-                        <LoaderComp v-if="signupBtnLoading" />
+                        <LoaderComp v-if="signupBtnLoading" :dummyText="'Sign Up'" />
                         <span v-else>Sign Up</span>
                     </button>
                 </div>

@@ -26,13 +26,18 @@
                     <router-link to="" class="forgot-password text-decoration-none">Forgot password</router-link>
                 </div>
                 <div class="w-100 d-flex justify-content-center">
-                    <button id="login" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">Login</button>
+                    <button id="login" @click="submitForm" class="px-2 py-1 mt-3 btn border-0 text-white">
+                        <LoaderComp v-if="loginBtnLoader" :dummyText="'Login'" />
+                        <span v-else>Login</span>
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 </template>
 <script>
+import LoaderComp from '@/components/LoaderComp.vue';
+
 export default {
     name: "LoginComp",
     data() {
@@ -45,15 +50,18 @@ export default {
             showPassword: false
         }
     },
+    components: {
+        LoaderComp
+    },
     mounted() {
     },
     methods: {
         async submitForm(event) {
             event.preventDefault();
 
-            this.loginBtnLoader = false;
-            await this.$store.dispatch('signInUser', this.payload);
             this.loginBtnLoader = true;
+            await this.$store.dispatch('signInUser', this.payload);
+            this.loginBtnLoader = false;
         },
         togglePasswordView() {
             let input = this.$refs.password;

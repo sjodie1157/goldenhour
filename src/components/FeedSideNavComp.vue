@@ -1,6 +1,8 @@
 <template>
     <div class="sideNav bg-primary-subtle" v-if="user && posts">
-        <button class="btn app-btn-dark rounded-0 shadow-none" data-bs-dismiss="offcanvas"><i class="bi bi-box-arrow-right"></i></button>
+        <div class="d-lg-none d-flex justify-content-end">
+            <button class="btn app-btn-dark rounded-0 shadow-none" data-bs-dismiss="offcanvas"><i class="bi bi-box-arrow-right"></i></button>
+        </div>
         <div class="profile_and_search p-4">
             <div class="input-group mb-3 px-4">
                 <span class="input-group-text border-0" id="search"><i
