@@ -111,7 +111,7 @@ class User {
         try {
             let user = verifyAToken(token);
 
-            const getUser = `SELECT userName, userEmail, userRole, userAge FROM Users WHERE userID = ?;`;
+            const getUser = `SELECT userName, userRole, userAge, userProfile FROM Users WHERE userID = ?;`;
 
             db.query(getUser, [_userID], (err, result)=>{
                 if(err) throw err
@@ -171,7 +171,9 @@ class User {
         let data = req.body;
         let _token = req.headers['authorization'];
 
-        console.log(_token)
+        if(_token.split(' ').at(-1) == 'null'){
+            _token = null
+        }
 
         if (!data.username || !data.email || !data.password ) {
             res.status(code.BADREQUEST).send({
@@ -205,7 +207,6 @@ class User {
 
         // token to check if the url is still valid
         let redirectUrl = `${PROTO}://${APP_DOMAIN}/verify?token=${token}`;
-
         if(_token){
             _token = _token.split(' ').at(-1)
             try {
